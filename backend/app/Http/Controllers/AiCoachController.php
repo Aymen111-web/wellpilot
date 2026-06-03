@@ -306,8 +306,20 @@ class AiCoachController extends Controller
         $text = $request->text;
         $lang = $request->lang ?? 'am';
 
-        // Clean up text by removing asterisks (bold markdown indicators), newlines and extra spaces
-        $text = str_replace(['**', "\r", "\n"], [' ', ' ', ' '], $text);
+        // 1. Clean up developer offline warning notice if present
+        $text = preg_replace('/\*\(Note:.*?\)\*/is', '', $text);
+        $text = preg_replace('/\*\(ማሳሰቢያ[:፡].*?\)\*/is', '', $text);
+
+        // 2. Remove emojis and miscellaneous symbols
+        $text = preg_replace('/[\x{1F300}-\x{1F9FF}]/u', '', $text);
+        $text = preg_replace('/[\x{2700}-\x{27BF}]/u', '', $text);
+        $text = preg_replace('/[\x{2600}-\x{26FF}]/u', '', $text);
+        $text = preg_replace('/[\x{1F600}-\x{1F64F}]/u', '', $text);
+        $text = preg_replace('/[\x{1F680}-\x{1F6FF}]/u', '', $text);
+
+        // 3. Clean up text by removing asterisks (bold/italic markdown indicators), newlines, list dashes and extra spaces
+        $text = str_replace(['**', '*', "\r", "\n"], [' ', ' ', ' ', ' '], $text);
+        $text = preg_replace('/^\s*-\s+/m', ' ', $text); // remove bullet list hyphens
         $text = preg_replace('/\s+/u', ' ', $text);
         $text = trim($text);
 

@@ -175,13 +175,39 @@ const sendChatMessage = async () => {
   }
 };
 
+const cleanTextForTts = (text) => {
+  if (!text) return '';
+  let clean = text;
+  
+  // Remove developer notices (both English and Amharic)
+  clean = clean.replace(/\*\(Note:.*?\)\*/gi, '');
+  clean = clean.replace(/\*\(ማሳሰቢያ[:፡].*?\)\*/gi, '');
+  
+  // Remove markdown symbols and bullet points
+  clean = clean.replace(/\*\*/g, '');
+  clean = clean.replace(/\*/g, '');
+  clean = clean.replace(/-\s+/g, '');
+  clean = clean.replace(/^\s*\d+\.\s+/gm, '');
+  
+  // Remove emojis
+  clean = clean.replace(/[\u{1F300}-\u{1F9FF}]/gu, '');
+  clean = clean.replace(/[\u{2700}-\u{27BF}]/gu, '');
+  clean = clean.replace(/[\u{2600}-\u{26FF}]/gu, '');
+  clean = clean.replace(/[\u{1F600}-\u{1F64F}]/gu, '');
+  clean = clean.replace(/[\u{1F680}-\u{1F6FF}]/gu, '');
+  
+  // Normalize whitespace
+  clean = clean.replace(/\s+/g, ' ').trim();
+  return clean;
+};
+
 const speakAILoud = (text, index) => {
   if (isSpeaking.value) {
     stopSpeaking();
     if (speakingIndex.value === index) return;
   }
 
-  const cleanText = text.replace(/\*\*/g, '').replace(/-\s+/g, '');
+  const cleanText = cleanTextForTts(text);
   const encodedText = encodeURIComponent(cleanText);
   const ttsUrl = `${backendUrl}/api/ai-coach/tts?text=${encodedText}&lang=${currentLang.value}`;
   
@@ -318,7 +344,7 @@ const speakVoiceResponse = (text) => {
     ttsAudio = null;
   }
 
-  const cleanText = text.replace(/\*\*/g, '').replace(/-\s+/g, '');
+  const cleanText = cleanTextForTts(text);
   const encodedText = encodeURIComponent(cleanText);
   const ttsUrl = `${backendUrl}/api/ai-coach/tts?text=${encodedText}&lang=${currentLang.value}`;
   

@@ -437,6 +437,17 @@ const getZoneColor = (score) => {
               <p class="text-xs text-zinc-500 dark:text-zinc-400 leading-relaxed">
                 {{ currentLang === 'am' ? act.description_am : act.description }}
               </p>
+
+              <!-- Personalized Explanation Block -->
+              <div 
+                v-if="act.why_recommended || act.why_recommended_am"
+                class="mt-3 p-3 bg-emerald-500/5 dark:bg-emerald-950/20 border border-emerald-500/10 rounded-xl text-left text-xs text-zinc-600 dark:text-zinc-300 leading-relaxed font-semibold"
+              >
+                <span class="text-[9px] uppercase tracking-wider font-extrabold text-emerald-600 dark:text-emerald-400 block mb-1">
+                  💡 {{ t.resorts.reasonLabel }}
+                </span>
+                &ldquo;{{ currentLang === 'am' ? act.why_recommended_am : act.why_recommended }}&rdquo;
+              </div>
             </div>
             
             <div class="mt-4 pt-3 border-t border-zinc-200/30 dark:border-zinc-800/30 flex justify-end">

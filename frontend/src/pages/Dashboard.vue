@@ -23,7 +23,7 @@ const fetchDashboardData = async () => {
   errorMsg.value = '';
   try {
     const [assessmentRes, challengeStatsRes] = await Promise.all([
-      api.get('/assessments'),
+      api.get(`/assessments?nickname=${encodeURIComponent(nickname.value)}`),
       api.get(`/challenges/stats?nickname=${encodeURIComponent(nickname.value)}`)
     ]);
     assessments.value = assessmentRes.data;

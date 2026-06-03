@@ -6,10 +6,16 @@ use Illuminate\Http\Request;
 
 class WellnessAssessmentController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        // Return all assessments in chronological order to plot trends in the dashboard
-        $assessments = \App\Models\WellnessAssessment::orderBy('created_at', 'asc')->get();
+        $nickname = $request->query('nickname');
+        if (empty($nickname)) {
+            return response()->json([]);
+        }
+        // Return only the current user's assessments in chronological order to plot trends in the dashboard
+        $assessments = \App\Models\WellnessAssessment::where('nickname', $nickname)
+            ->orderBy('created_at', 'asc')
+            ->get();
         return response()->json($assessments);
     }
 
@@ -128,28 +134,119 @@ class WellnessAssessmentController extends Controller
         ]);
 
         // Match categories for resort experiences catalog recommendations
-        $categories = [];
-        if ($stressScore < 40) {
-            $categories[] = 'Stress';
+        $matched = collect();
+        $reasons = [];
+
+        // Check Stress deficit
+        if ($request->stress_level >= 6) {
+            $activities = \App\Models\ResortRecommendation::where('wellness_category', 'Stress')->get();
+            $matched = $matched->merge($activities);
+            foreach ($activities as $act) {
+                $reasons[$act->id] = [
+                    'why' => "Recommended because your stress level is high ({$request->stress_level}/10), requiring relaxing body-mind therapies to lower cortisol.",
+                    'why_am' => "የጭንቀትዎ መጠን ከፍተኛ ({$request->stress_level}/10) በመሆኑ የሰውነትና የአእምሮ ውጥረትን ለመቀነስ ይህ ተግባር ተመርጧል።"
+                ];
+            }
         }
-        if ($activity === 'low') {
-            $categories[] = 'Physical Activity';
+
+        // Check Sleep deficit
+        if ($request->sleep_hours < 7) {
+            $activities = \App\Models\ResortRecommendation::where('wellness_category', 'Sleep')->get();
+            $matched = $matched->merge($activities);
+            foreach ($activities as $act) {
+                $reasons[$act->id] = [
+                    'why' => "Recommended due to your low sleep duration ({$request->sleep_hours} hrs), aiming to restore natural sleep cycles and promote deep rest.",
+                    'why_am' => "የእንቅልፍ ሰዓትዎ አነስተኛ ({$request->sleep_hours} ሰዓት) በመሆኑ ተፈጥሯዊ የእንቅልፍ ዑደትን ለማስተካከልና ጥልቅ እረፍት ለማግኘት ተመርጧል።"
+                ];
+            }
         }
-        if ($sleep < 6) {
-            $categories[] = 'Sleep';
+
+        // Check Activity deficit
+        if ($request->activity_level === 'low') {
+            $activities = \App\Models\ResortRecommendation::where('wellness_category', 'Physical Activity')->get();
+            $matched = $matched->merge($activities);
+            foreach ($activities as $act) {
+                $reasons[$act->id] = [
+                    'why' => "Recommended because of your sedentary/low physical activity level, designed to introduce gentle movement and boost energy.",
+                    'why_am' => "የአካል ብቃት እንቅስቃሴዎ አነስተኛ በመሆኑ፣ ቀላል እንቅስቃሴዎችን በመጀመር የሰውነትን የሜታቦሊም ፍጥነት ለመጨመር ተመርጧል።"
+                ];
+            }
         }
+
+        // Check Hydration deficit
+        if ($request->water_intake < 2.5) {
+            $activities = \App\Models\ResortRecommendation::where('wellness_category', 'Hydration')->get();
+            $matched = $matched->merge($activities);
+            foreach ($activities as $act) {
+                $reasons[$act->id] = [
+                    'why' => "Recommended because your water intake is below the recommended level ({$request->water_intake} L), helping to restore cellular hydration.",
+                    'why_am' => "የዕለታዊ የውሃ ፍጆታዎ ({$request->water_intake} ሊትር) ዝቅተኛ በመሆኑ የሰውነትዎን ፈሳሽ መጠን ለመተካት ተመርጧል።"
+                ];
+            }
+        }
+
+        // Check Mood deficit
+        if (in_array($request->mood_level, ['sad', 'stressed'])) {
+            $activities = \App\Models\ResortRecommendation::where('wellness_category', 'Mood')->get();
+            $matched = $matched->merge($activities);
+            foreach ($activities as $act) {
+                $reasons[$act->id] = [
+                    'why' => "Recommended because you reported feeling {$request->mood_level}, helping to elevate mood and release positive endorphins.",
+                    'why_am' => "የዛሬ ስሜትዎ ({$request->mood_level}) ዝቅተኛ ሆኖ በመመዝገቡ፣ ስሜትዎን ለማሻሻልና አዎንታዊ ሆርሞኖችን ለማመንጨት ተመርጧል።"
+                ];
+            }
+        }
+
+        // Check Excellent Wellness Score (75+)
         if ($wellnessScore >= 75) {
-            $categories[] = 'Mood';
-            $categories[] = 'Hydration';
+            $activeMood = \App\Models\ResortRecommendation::whereIn('wellness_category', ['Physical Activity', 'Mood'])->get();
+            $matched = $matched->merge($activeMood);
+            foreach ($activeMood as $act) {
+                if (!isset($reasons[$act->id])) {
+                    $reasons[$act->id] = [
+                        'why' => "Recommended because of your excellent wellness profile ({$wellnessScore}/100) to keep you active, social, and thriving.",
+                        'why_am' => "ምርጥ የጤና ውጤት ({$wellnessScore}/100) ስላስመዘገቡ፣ ንቁ እና ማህበራዊ ሆነው እንዲቀጥሉ ተመርጧል።"
+                    ];
+                }
+            }
         }
 
-        // If no specific deficit categories are met, recommend a default mix
-        if (empty($categories)) {
-            $categories = ['Stress', 'Sleep', 'Physical Activity', 'Hydration', 'Mood'];
+        // Fallback to Balanced Wellness mix if empty
+        if ($matched->isEmpty()) {
+            $balanced = \App\Models\ResortRecommendation::whereIn('wellness_category', ['Stress', 'Mood', 'Sleep'])->get();
+            $matched = $matched->merge($balanced);
+            foreach ($balanced as $act) {
+                $reasons[$act->id] = [
+                    'why' => "Recommended to support your overall wellness balance and maintain healthy body-mind alignment.",
+                    'why_am' => "አጠቃላይ የአካልና አእምሮ ጤናዎን ለማገዝና ጤናማ ሚዛንን ለመጠበቅ ተመርጧል።"
+                ];
+            }
         }
 
-        $recommendedResorts = \App\Models\ResortRecommendation::whereIn('wellness_category', $categories)->get();
-        $assessment->recommended_resorts = $recommendedResorts;
+        // De-duplicate matched list by ID
+        $matched = $matched->unique('id')->values();
+
+        // Enforce Limits (Min 2, Max 4)
+        if ($matched->count() > 4) {
+            $matched = $matched->take(4);
+        } elseif ($matched->count() < 2) {
+            $fillers = \App\Models\ResortRecommendation::whereNotIn('id', $matched->pluck('id'))->get();
+            $needed = 2 - $matched->count();
+            $matched = $matched->merge($fillers->take($needed));
+        }
+
+        // Map recommendations with explanations
+        $recommendations = $matched->map(function ($act) use ($reasons) {
+            $why = $reasons[$act->id]['why'] ?? "Recommended to support your overall wellness balance.";
+            $whyAm = $reasons[$act->id]['why_am'] ?? "አጠቃላይ የአካልና አእምሮ ጤናዎን ለማገዝ ተመርጧል።";
+
+            $actArray = $act->toArray();
+            $actArray['why_recommended'] = $why;
+            $actArray['why_recommended_am'] = $whyAm;
+            return $actArray;
+        });
+
+        $assessment->recommended_resorts = $recommendations;
 
         return response()->json($assessment, 217); // 217 created status
     }

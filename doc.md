@@ -777,3 +777,133 @@ Today
 * Positive and encouraging tone
 * Use Vue.js components and Laravel API endpoints
 * Store data in MySQL
+Implement a Personalized Resort Recommendations module.
+
+Requirements:
+
+1. Resort recommendations must be generated based on the user's assessment results and wellness score.
+
+2. Do NOT display all available resort experiences.
+
+3. Recommend:
+
+   * Minimum: 2 experiences
+   * Maximum: 4 experiences
+
+4. Recommendations must be personalized using:
+
+   * Wellness Score
+   * Stress Level
+   * Sleep Quality
+   * Physical Activity Level
+   * Hydration Level
+   * Mood Level
+
+5. Each recommendation should explain WHY it was recommended.
+
+---
+
+Recommendation Logic Examples
+
+High Stress:
+Recommend:
+
+* Spa Therapy
+* Meditation Session
+* Nature Walk
+* Relaxation Lounge
+
+Poor Sleep:
+Recommend:
+
+* Sleep Wellness Program
+* Evening Meditation
+* Relaxing Nature Experience
+
+Low Physical Activity:
+Recommend:
+
+* Swimming
+* Morning Yoga
+* Guided Fitness Activities
+
+Excellent Wellness Score (75+):
+Recommend:
+
+* Adventure Activities
+* Social Wellness Events
+* Resort Exploration Activities
+* Sunrise Beach Yoga
+
+Balanced Wellness:
+Recommend:
+
+* Yoga Sessions
+* Nature Walks
+* Wellness Workshops
+* Mindfulness Activities
+
+---
+
+Wellness Insights Section
+
+Display a wellness interpretation section above recommendations.
+
+Example:
+
+Balancing Zone
+
+Good foundation! You are maintaining a healthy wellness baseline. Focused attention on weaker wellness areas can significantly improve your overall well-being.
+
+Recommended Action:
+Try participating in a Sunrise Beach Yoga session to enhance balance and mindfulness.
+
+---
+
+Specific Recommendations Section
+
+Generate personalized explanations based on assessment results.
+
+Example:
+
+High Stress Detected
+
+Your stress indicators suggest a need for relaxation-focused activities. We recommend Spa Therapy, Meditation Sessions, Nature Walks, and Relaxation Experiences.
+
+Good Wellness Score
+
+You are maintaining a healthy lifestyle. Continue your progress with active experiences such as Adventure Activities and Social Wellness Events.
+
+---
+
+Language Support
+
+The recommendation system must support both English and Amharic.
+
+If the application's language toggle is set to English:
+
+* Display all recommendations and explanations in English.
+
+If the application's language toggle is set to Amharic:
+
+* Display all recommendations and explanations in natural Ethiopian Amharic.
+
+Example Amharic Output:
+
+የጤና ሁኔታ ግምገማ
+
+ጥሩ መሠረት አለዎት። በአጠቃላይ ጤናዎን በጥሩ ሁኔታ እየጠበቁ ነው። ነገር ግን ዝቅተኛ ውጤት ባሳዩባቸው ዘርፎች ላይ ትኩረት ካደረጉ የተሻለ ውጤት ማግኘት ይችላሉ።
+
+ሊተገበሩ የሚችሉ ምክሮች
+
+* ከፍተኛ ውጥረት ተገኝቷል። የስፓ አገልግሎት፣ ሜዲቴሽን፣ የተፈጥሮ ጉዞ እና የመዝናኛ እንቅስቃሴዎችን እንመክራለን።
+
+* ጥሩ የጤና ውጤት አለዎት። ይህንን ሚዛን በመጠበቅ እንደ የጀብዱ እንቅስቃሴዎች እና ማህበራዊ የጤና ፕሮግራሞች ያሉ ተግባራትን ይሞክሩ።
+
+Important:
+
+* Recommendations must always be personalized.
+* Never show more than 4 recommendations.
+* Never show fewer than 2 recommendations.
+* Use assessment data to determine which experiences to recommend.
+* Generate content in the currently selected application language.
