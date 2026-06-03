@@ -14,9 +14,12 @@ return new class extends Migration
         Schema::create('wellness_challenges', function (Blueprint $table) {
             $table->id();
             $table->string('challenge_name');
+            $table->string('challenge_name_am');
             $table->text('description');
+            $table->text('description_am');
             $table->integer('duration_days');
             $table->integer('reward_points');
+            $table->string('category');
             $table->timestamps();
         });
     }

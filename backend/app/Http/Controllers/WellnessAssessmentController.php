@@ -22,7 +22,10 @@ class WellnessAssessmentController extends Controller
             'water_intake' => 'required|numeric|min:0|max:20',
             'activity_level' => 'required|string|in:low,medium,high',
             'mood_level' => 'required|string|in:sad,stressed,neutral,happy,excited',
+            'lang' => 'nullable|string|in:en,am',
         ]);
+
+        $isAm = ($request->lang === 'am');
 
         // 1. Calculate Stress Score (Inverted: low stress is good)
         $stressScore = (10 - $request->stress_level) * 10;
@@ -60,38 +63,57 @@ class WellnessAssessmentController extends Controller
         // Calculate final average wellness score
         $wellnessScore = (int) round(($stressScore + $sleepScore + $waterScore + $activityScore + $moodScore) / 5);
 
-        // Generate tailored suggestions
+        // Generate tailored suggestions matching new doc.md Resort Recommendation Logic
         $suggestionItems = [];
 
-        if ($request->stress_level >= 6) {
-            $suggestionItems[] = "Your stress levels are elevated. Prioritize deep breathing exercises, quiet nature walks, and try to carve out 10-15 minute mindfulness breaks during busy hours.";
+        // Condition: High Stress (stress score < 40)
+        if ($stressScore < 40) {
+            $suggestionItems[] = $isAm 
+                ? "ከፍተኛ ውጥረት/ጭንቀት ተገኝቷል (የውጥረት መጠን ከ40 በታች)። የነርቭ ሥርዓትዎን ለማረጋጋት እንደ ስፓ ቴራፒ (Spa therapy)፣ ማሰላሰል (Meditation)፣ ተፈጥሮአዊ የእግር ጉዞ (Nature walks) እና የመዝናኛ ክፍለ-ጊዜዎች (Relaxation sessions) ባሉ ዘና የሚያደርጉ የሪዞርት እንቅስቃሴዎች ላይ እንዲሳተፉ እንመክራለን።"
+                : "High Stress detected (Stress score < 40). We recommend participating in relaxing resort activities like Spa therapy, Meditation, Nature walks, and Relaxation sessions to help calm your nervous system.";
         }
-        if ($sleep < 7) {
-            $suggestionItems[] = "Your sleep duration is below the recommended range. Try establishing a calming, screen-free pre-sleep wind-down routine and aim for a consistent bedtime.";
-        }
-        if ($water < 2.5) {
-            $suggestionItems[] = "Your water intake is sub-optimal. Keep a reusable water bottle near your desk, and try setting hourly reminders to sip water. Aim for at least 8-10 glasses.";
-        }
+
+        // Condition: Low Activity (activity level low)
         if ($activity === 'low') {
-            $suggestionItems[] = "Your activity level is low. Add short periods of low-intensity movement to your schedule—such as a 20-minute post-lunch walk or a brief swimming session.";
+            $suggestionItems[] = $isAm 
+                ? "አነስተኛ የአካል እንቅስቃሴ ተገኝቷል። እንደ ዋና (Swimming)፣ የአካል ብቃት ፕሮግራሞች (Fitness programs) እና የዮጋ ክፍለ-ጊዜዎች (Yoga sessions) ያሉ የአካል እንቅስቃሴዎችን በቆይታዎ ውስጥ ለማካተት ይሞክሩ።"
+                : "Low Activity detected. Try incorporating movement into your stay, such as Swimming, Fitness programs, and Yoga sessions.";
         }
-        if (in_array($mood, ['sad', 'stressed'])) {
-            $suggestionItems[] = "Your mood suggests emotional exhaustion. Be kind to yourself, practice expressive journal writing, and try engaging in creative, tactile activities like clay modeling or painting.";
+
+        // Condition: Poor Sleep (< 6 hrs)
+        if ($sleep < 6) {
+            $suggestionItems[] = $isAm 
+                ? "አነስተኛ የእንቅልፍ ጥራት ተገኝቷል (ከ6 ሰዓት በታች)። የእንቅልፍ ልምድዎን እና ጉልበትዎን ለመመለስ የእንቅልፍ ጤና ፕሮግራሞችን (Sleep wellness programs) እና የመዝናኛ ማገገሚያዎችን (Relaxation retreats) እንዲጎበኙ እንመክራለን።"
+                : "Poor Sleep Quality detected (under 6 hours). We recommend exploring Sleep wellness programs and Relaxation retreats to restore your sleep hygiene and energy.";
+        }
+
+        // Condition: Good Wellness (score >= 75)
+        if ($wellnessScore >= 75) {
+            $suggestionItems[] = $isAm 
+                ? "ጥሩ የጤና ውጤት (75+)! በጣም ጥሩ እየሰሩ ነው። ይህንን ሚዛን ይጠብቁ እና እንደ ጀብዱ እንቅስቃሴዎች (Adventure activities) እና ማህበራዊ የጤና ዝግጅቶች (Social wellness events) ባሉ ንቁ የሪዞርት ተሞክሮዎች ይደሰቱ።"
+                : "Good Wellness Score (75+)! You are doing great. Keep up the balance and enjoy active resort experiences like Adventure activities and Social wellness events.";
         }
 
         // Add overall zone feedback
         if ($wellnessScore >= 80) {
-            $zoneFeedback = "Thriving Zone: Exceptional self-care! You have highly balanced wellness habits. Keep up this incredible routine, and consider rewarding yourself with a luxurious resort experience like our Deep Tissue Massage or a Sunset Lagoon Kayaking adventure.";
+            $zoneFeedback = $isAm 
+                ? "የበለጸገ ደረጃ (Thriving Zone)፦ ልዩ የሆነ ራስን የመንከባከብ ልምድ! ከፍተኛ ሚዛናዊ የሆኑ የጤና ልምዶች አሉዎት። ይህንን አስደናቂ ልማድ ይቀጥሉበት፣ እና እንደ ጥልቅ የአካል ማሸት (Deep Tissue Massage) ወይም የፀሐይ መጥለቂያ ካያኪንግ (Sunset Lagoon Kayaking) ባሉ የቅንጦት የሪዞርት ተሞክሮዎች እራስዎን ይሸልሙ።"
+                : "Thriving Zone: Exceptional self-care! You have highly balanced wellness habits. Keep up this incredible routine, and consider rewarding yourself with a luxurious resort experience like our Deep Tissue Massage or a Sunset Lagoon Kayaking adventure.";
         } elseif ($wellnessScore >= 60) {
-            $zoneFeedback = "Balancing Zone: Good foundation! You are maintaining a healthy baseline, but focused attention on weaker areas will significantly boost your well-being. Try adding a Sunrise Beach Yoga session to bring extra centering energy.";
+            $zoneFeedback = $isAm 
+                ? "የተመጣጠነ ደረጃ (Balancing Zone)፦ ጥሩ መሠረት! ጤናማ ሁኔታን እየጠበቁ ነው፣ ነገር ግን ደካማ ለሆኑ ክፍሎች ትኩረት መስጠት ደህንነትዎን በእጅጉ ያሻሽላል። ተጨማሪ የማረጋጋት ኃይልን ለማግኘት የማለዳ የባህር ዳርቻ ዮጋ (Sunrise Beach Yoga) ለመሞከር ይሞክሩ።"
+                : "Balancing Zone: Good foundation! You are maintaining a healthy baseline, but focused attention on weaker areas will significantly boost your well-being. Try adding a Sunrise Beach Yoga session to bring extra centering energy.";
         } else {
-            $zoneFeedback = "Healing Zone: Recovery needed. Your mind and body are sending warning signs. This is the perfect time to step back, rest, and engage in deeply restorative activities like our Acoustic Sound Bath or guided Forest Meditation.";
+            $zoneFeedback = $isAm 
+                ? "የማገገሚያ ደረጃ (Healing Zone)፦ ማገገም ያስፈልጋል። አእምሮዎ እና አካልዎ የማስጠንቀቂያ ምልክቶችን እየላኩ ነው። ይህ ጊዜ እረፍት ለመውሰድ እና እንደ የድምፅ መታጠቢያ (Acoustic Sound Bath) ወይም ጫካ ውስጥ ማሰላሰል (Forest Meditation) ባሉ ጥልቅ የሰውነት ማደሻ ተግባራት ላይ ለመሳተፍ ትክክለኛው ጊዜ ነው።"
+                : "Healing Zone: Recovery needed. Your mind and body are sending warning signs. This is the perfect time to step back, rest, and engage in deeply restorative activities like our Acoustic Sound Bath or guided Forest Meditation.";
         }
 
         // Combine into a formatted text string
         $suggestions = $zoneFeedback;
         if (count($suggestionItems) > 0) {
-            $suggestions .= "\n\nSpecific Recommendations:\n- " . implode("\n- ", $suggestionItems);
+            $header = $isAm ? "\n\nየተመረጡ ምክሮች፦\n- " : "\n\nSpecific Recommendations:\n- ";
+            $suggestions .= $header . implode($isAm ? "\n- " : "\n- ", $suggestionItems);
         }
 
         $assessment = \App\Models\WellnessAssessment::create([
@@ -104,6 +126,30 @@ class WellnessAssessmentController extends Controller
             'wellness_score' => $wellnessScore,
             'suggestions' => $suggestions,
         ]);
+
+        // Match categories for resort experiences catalog recommendations
+        $categories = [];
+        if ($stressScore < 40) {
+            $categories[] = 'Stress';
+        }
+        if ($activity === 'low') {
+            $categories[] = 'Physical Activity';
+        }
+        if ($sleep < 6) {
+            $categories[] = 'Sleep';
+        }
+        if ($wellnessScore >= 75) {
+            $categories[] = 'Mood';
+            $categories[] = 'Hydration';
+        }
+
+        // If no specific deficit categories are met, recommend a default mix
+        if (empty($categories)) {
+            $categories = ['Stress', 'Sleep', 'Physical Activity', 'Hydration', 'Mood'];
+        }
+
+        $recommendedResorts = \App\Models\ResortRecommendation::whereIn('wellness_category', $categories)->get();
+        $assessment->recommended_resorts = $recommendedResorts;
 
         return response()->json($assessment, 217); // 217 created status
     }

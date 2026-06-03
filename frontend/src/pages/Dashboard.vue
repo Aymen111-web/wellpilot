@@ -7,24 +7,65 @@ import api from '../services/api';
 const { currentLang, t } = useLanguage();
 
 // Analytics states
+const nickname = ref(localStorage.getItem('wellpilot_nickname') || 'Guest');
 const assessments = ref([]);
 const isLoading = ref(true);
 const errorMsg = ref('');
+const challengeStats = ref({
+  total_completed: 0,
+  wellness_points: 0,
+  streak: 0,
+  recent_reflections: []
+});
 
 const fetchDashboardData = async () => {
   isLoading.value = true;
   errorMsg.value = '';
   try {
-    const response = await api.get('/assessments');
-    // Laravel index returns assessments ordered asc by created_at
-    assessments.value = response.data;
+    const [assessmentRes, challengeStatsRes] = await Promise.all([
+      api.get('/assessments'),
+      api.get(`/challenges/stats?nickname=${encodeURIComponent(nickname.value)}`)
+    ]);
+    assessments.value = assessmentRes.data;
+    challengeStats.value = challengeStatsRes.data;
   } catch (err) {
     console.error('Error fetching dashboard data:', err);
     errorMsg.value = currentLang.value === 'en'
-      ? 'Failed to retrieve assessment trends. Is backend running?'
-      : 'የጤና መረጃዎች ጉዞን ለማውረድ አልተቻለም። የጀርባ አገልግሎት (backend) እየሰራ መሆኑን ያረጋግጡ::';
+      ? 'Failed to retrieve dashboard trends. Is backend running?'
+      : 'የክትትል መረጃዎችን ለማውረድ አልተቻለም። የጀርባ አገልግሎት (backend) እየሰራ መሆኑን ያረጋግጡ::';
   } finally {
     isLoading.value = false;
+  }
+};
+
+const getCategoryIcon = (cat) => {
+  const icons = {
+    'Hydration': '🥤',
+    'Sleep': '🛌',
+    'Physical Activity': '🧘‍♂️',
+    'Mental Wellness': '💆‍♀️',
+    'Nutrition': '🥗',
+    'Self-Care': '🌿'
+  };
+  return icons[cat] || '✨';
+};
+
+const formatReflectionDate = (dateString) => {
+  const date = new Date(dateString);
+  const today = new Date();
+  const yesterday = new Date();
+  yesterday.setDate(today.getDate() - 1);
+
+  if (date.toDateString() === today.toDateString()) {
+    return currentLang.value === 'en' ? 'Today' : 'ዛሬ';
+  } else if (date.toDateString() === yesterday.toDateString()) {
+    return currentLang.value === 'en' ? 'Yesterday' : 'ትላንትና';
+  } else {
+    if (currentLang.value === 'en') {
+      return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    } else {
+      return `${date.getMonth() + 1}/${date.getDate()}/${date.getFullYear()}`;
+    }
   }
 };
 
@@ -254,6 +295,105 @@ const formatDate = (dateString) => {
           <RouterLink to="/assessment" class="mt-6 w-full py-3 bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-center text-xs rounded-xl shadow transition duration-200">
             Retake Assessment
           </RouterLink>
+        </div>
+
+      </div>
+
+      <!-- Wellness Challenges Progress Row -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+        
+        <!-- Stats Summary Card (4 columns) -->
+        <div class="lg:col-span-4 bg-white dark:bg-zinc-900/60 border border-zinc-200/50 dark:border-zinc-800/50 p-6 rounded-3xl shadow-sm flex flex-col justify-between space-y-6">
+          <h3 class="font-extrabold text-zinc-800 dark:text-zinc-200 text-sm tracking-wide uppercase border-b border-zinc-200/30 dark:border-zinc-800/30 pb-3">
+            {{ currentLang === 'am' ? 'የተግዳሮቶች ሁኔታ' : 'Wellness Challenge Stats' }}
+          </h3>
+          
+          <div class="space-y-4 flex-grow">
+            <!-- Points Balance -->
+            <div class="flex items-center justify-between p-3 rounded-xl bg-emerald-500/5 border border-emerald-500/10">
+              <div class="flex items-center space-x-3">
+                <span class="text-2xl">💎</span>
+                <div class="flex flex-col">
+                  <span class="text-[10px] uppercase font-bold text-zinc-400 leading-none">Wellness Points</span>
+                  <span class="text-xs font-semibold text-zinc-600 dark:text-zinc-300">Total Points Balance</span>
+                </div>
+              </div>
+              <span class="text-2xl font-black text-emerald-500">{{ challengeStats.wellness_points }}</span>
+            </div>
+
+            <!-- Current Streak -->
+            <div class="flex items-center justify-between p-3 rounded-xl bg-orange-500/5 border border-orange-500/10">
+              <div class="flex items-center space-x-3">
+                <span class="text-2xl">🔥</span>
+                <div class="flex flex-col">
+                  <span class="text-[10px] uppercase font-bold text-zinc-400 leading-none">{{ t.challenges.currentStreak }}</span>
+                  <span class="text-xs font-semibold text-zinc-600 dark:text-zinc-300">Consecutive Activity</span>
+                </div>
+              </div>
+              <span class="text-2xl font-black text-orange-500">{{ challengeStats.streak }} {{ t.challenges.streakDays }}</span>
+            </div>
+
+            <!-- Total Completed -->
+            <div class="flex items-center justify-between p-3 rounded-xl bg-indigo-500/5 border border-indigo-500/10">
+              <div class="flex items-center space-x-3">
+                <span class="text-2xl">🏆</span>
+                <div class="flex flex-col">
+                  <span class="text-[10px] uppercase font-bold text-zinc-400 leading-none">{{ t.challenges.totalCompleted }}</span>
+                  <span class="text-xs font-semibold text-zinc-600 dark:text-zinc-300">Habits Logged</span>
+                </div>
+              </div>
+              <span class="text-2xl font-black text-indigo-500">{{ challengeStats.total_completed }}</span>
+            </div>
+          </div>
+
+          <RouterLink to="/challenges" class="w-full py-3 bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-center text-xs rounded-xl shadow transition duration-200 cursor-pointer">
+            {{ currentLang === 'am' ? 'ተግዳሮቶችን አሳይ' : 'Explore Wellness Challenges' }}
+          </RouterLink>
+        </div>
+
+        <!-- Recent Reflections list (8 columns) -->
+        <div class="lg:col-span-8 bg-white dark:bg-zinc-900/60 border border-zinc-200/50 dark:border-zinc-800/50 p-6 rounded-3xl shadow-sm flex flex-col justify-between">
+          <div class="space-y-4 w-full">
+            <div class="flex items-center justify-between border-b border-zinc-200/30 dark:border-zinc-800/30 pb-3">
+              <h3 class="font-extrabold text-zinc-800 dark:text-zinc-200 text-sm tracking-wide uppercase">
+                {{ t.challenges.recentReflections }}
+              </h3>
+              <span class="text-[10px] font-extrabold uppercase tracking-widest text-zinc-400">Mindfulness Journal</span>
+            </div>
+
+            <!-- If no reflections -->
+            <div v-if="!challengeStats.recent_reflections || challengeStats.recent_reflections.length === 0" class="flex flex-col items-center justify-center py-12 text-center text-zinc-400 space-y-2">
+              <span class="text-3xl">📝</span>
+              <p class="text-xs font-semibold max-w-xs">{{ t.challenges.noReflections }}</p>
+              <RouterLink to="/challenges" class="text-xs font-extrabold text-emerald-500 hover:underline pt-2">{{ t.challenges.joinBtn }}</RouterLink>
+            </div>
+
+            <!-- Reflections Grid -->
+            <div v-else class="grid grid-cols-1 sm:grid-cols-2 gap-4 max-h-[300px] overflow-y-auto pr-1">
+              <div 
+                v-for="(reflec, rIdx) in challengeStats.recent_reflections" 
+                :key="rIdx"
+                class="p-4 rounded-2xl bg-zinc-50/50 dark:bg-zinc-950/40 border border-zinc-200/40 dark:border-zinc-800/40 flex flex-col justify-between space-y-3"
+              >
+                <div class="space-y-2">
+                  <div class="flex items-center justify-between">
+                    <span class="text-[9px] uppercase font-black text-zinc-400 tracking-wider">
+                      {{ getCategoryIcon(reflec.category) }} {{ reflec.category }}
+                    </span>
+                    <span class="text-[9px] font-bold text-zinc-400 bg-zinc-200/20 dark:bg-zinc-800/30 py-0.5 px-2 rounded-full">
+                      {{ formatReflectionDate(reflec.completed_at) }}
+                    </span>
+                  </div>
+                  <h4 class="text-xs font-extrabold text-zinc-800 dark:text-zinc-200 leading-tight">
+                    {{ currentLang === 'am' ? reflec.challenge_name_am : reflec.challenge_name }}
+                  </h4>
+                  <p class="text-xs text-zinc-600 dark:text-zinc-300 italic leading-relaxed font-medium">
+                    &ldquo;{{ reflec.reflection_text }}&rdquo;
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
 
       </div>

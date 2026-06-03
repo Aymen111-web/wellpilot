@@ -14,6 +14,8 @@ Route::get('/user', function (Request $request) {
 Route::get('/assessments', [WellnessAssessmentController::class, 'index']);
 Route::post('/assessments', [WellnessAssessmentController::class, 'store']);
 Route::get('/challenges', [WellnessChallengeController::class, 'index']);
+Route::get('/challenges/stats', [WellnessChallengeController::class, 'stats']);
+Route::post('/challenges/{id}/complete', [WellnessChallengeController::class, 'complete']);
 Route::get('/resorts', [ResortRecommendationController::class, 'index']);
 Route::post('/ai-coach', [AiCoachController::class, 'chat']);
 Route::get('/ai-coach/status', [AiCoachController::class, 'status']);

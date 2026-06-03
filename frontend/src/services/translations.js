@@ -137,7 +137,27 @@ export const translations = {
       joinBtn: 'Join Challenge',
       activeStatus: 'Active',
       completedStatus: 'Completed!',
-      logDayBtn: 'Log Today\'s Progress'
+      logDayBtn: 'Log Today\'s Progress',
+      markComplete: 'Mark Complete',
+      alreadyCompleted: 'You have already completed a challenge in this category today. Please come back tomorrow.',
+      reflectionTitle: 'How did you feel after completing this challenge?',
+      reflectionPlh: 'Example: I feel more energetic and refreshed.',
+      saveReflection: 'Save Reflection',
+      skip: 'Skip',
+      successTitle: '🎉 Challenge Completed!',
+      successSubtitle: 'You earned wellness points.',
+      successBody: 'Keep building healthy habits and come back tomorrow for more challenges.',
+      category: 'Category',
+      totalCompleted: 'Total Completed',
+      currentStreak: 'Current Streak',
+      streakDays: 'days',
+      recentReflections: 'Recent Reflections',
+      noReflections: 'No reflections logged yet. Complete challenges to reflect on your journey!',
+      nicknameLabel: 'Your Nickname',
+      changeNickname: 'Update Nickname',
+      challengeLabel: 'Challenge',
+      dateLabel: 'Date',
+      reflectionLabel: 'Reflection'
     }
   },
   am: {
@@ -253,7 +273,27 @@ export const translations = {
       joinBtn: 'ተሳተፍ',
       activeStatus: 'በእንቅስቃሴ ላይ',
       completedStatus: 'ተጠናቋል!',
-      logDayBtn: 'የዛሬውን እድገት መዝግብ'
+      logDayBtn: 'የዛሬውን እድገት መዝግብ',
+      markComplete: '✓ ተጠናቋል በል',
+      alreadyCompleted: 'ዛሬ በዚህ ዘርፍ ሌላ ፈተና አጠናቀዋል። እባክዎን ነገ ይመለሱ።',
+      reflectionTitle: 'ይህን ተግዳሮት ካጠናቀቁ በኋላ ምን ተሰማዎት?',
+      reflectionPlh: 'ምሳሌ፦ የበለጠ ጉልበትና መነቃቃት ተሰማኝ።',
+      saveReflection: 'አስተያየቱን አስቀምጥ',
+      skip: 'ለማለፍ',
+      successTitle: '🎉 ተግዳሮቱ ተጠናቋል!',
+      successSubtitle: 'የጤና ነጥቦችን አግኝተዋል።',
+      successBody: 'ጤናማ ልምዶችን መገንባትዎን ይቀጥሉ እና ለተጨማሪ ተግዳሮቶች ነገ ይመለሱ።',
+      category: 'ዘርፍ',
+      totalCompleted: 'የተጠናቀቁ ተግዳሮቶች',
+      currentStreak: 'የተከታታይ ቀናት ብዛት',
+      streakDays: 'ቀናት',
+      recentReflections: 'የቅርብ ጊዜ አስተያየቶች',
+      noReflections: 'እስካሁን ምንም አስተያየት አልተመዘገበም። በጤና ጉዞዎ ላይ ለማሰላሰል ተግዳሮቶችን ያጠናቅቁ!',
+      nicknameLabel: 'ቅጽል ስምዎ',
+      changeNickname: 'ቅጽል ስም ቀይር',
+      challengeLabel: 'ተግዳሮት',
+      dateLabel: 'ቀን',
+      reflectionLabel: 'አስተያየት'
     }
   }
 };

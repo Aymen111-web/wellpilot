@@ -15,7 +15,9 @@ return new class extends Migration
             $table->id();
             $table->string('wellness_category');
             $table->string('activity_name');
+            $table->string('activity_name_am');
             $table->text('description');
+            $table->text('description_am');
             $table->timestamps();
         });
     }

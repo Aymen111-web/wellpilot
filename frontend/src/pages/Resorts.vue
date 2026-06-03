@@ -154,17 +154,17 @@ const confirmBooking = () => {
           <div class="p-6 pb-2 flex items-center justify-between">
             <span class="px-3 py-1 rounded-full border border-emerald-500/20 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-[10px] font-extrabold uppercase tracking-wider flex items-center space-x-1">
               <span>{{ getCategoryIcon(act.wellness_category) }}</span>
-              <span>{{ act.wellness_category }}</span>
+              <span>{{ getCategoryTranslations(act.wellness_category) }}</span>
             </span>
           </div>
 
           <!-- Content Details -->
           <div class="p-6 pt-2 space-y-3 flex-grow">
             <h3 class="text-lg font-bold text-zinc-900 dark:text-white group-hover:text-emerald-500 transition-colors">
-              {{ act.activity_name }}
+              {{ currentLang === 'am' ? act.activity_name_am : act.activity_name }}
             </h3>
             <p class="text-xs sm:text-sm text-zinc-500 dark:text-zinc-400 leading-relaxed">
-              {{ act.description }}
+              {{ currentLang === 'am' ? act.description_am : act.description }}
             </p>
           </div>
 
@@ -208,17 +208,17 @@ const confirmBooking = () => {
           <!-- Pending Modal State -->
           <div v-if="!isBookingSuccess" class="space-y-6">
             <div class="space-y-2">
-              <span class="text-xs uppercase font-extrabold tracking-widest text-zinc-400">Reservation Details</span>
+              <span class="text-xs uppercase font-extrabold tracking-widest text-zinc-400">{{ currentLang === 'am' ? 'የቦታ ማስያዝ ዝርዝሮች' : 'Reservation Details' }}</span>
               <h3 class="text-xl font-bold text-zinc-900 dark:text-white">
-                {{ selectedActivity?.activity_name }}
+                {{ currentLang === 'am' ? selectedActivity?.activity_name_am : selectedActivity?.activity_name }}
               </h3>
-              <p class="text-xs text-zinc-500 leading-relaxed">{{ selectedActivity?.description }}</p>
+              <p class="text-xs text-zinc-500 leading-relaxed">{{ currentLang === 'am' ? selectedActivity?.description_am : selectedActivity?.description }}</p>
             </div>
 
             <!-- Loader indicator -->
             <div v-if="isBookingLoading" class="flex flex-col items-center justify-center py-6 space-y-2">
               <div class="w-8 h-8 rounded-full border-2 border-emerald-500/20 border-t-emerald-500 animate-spin"></div>
-              <p class="text-[10px] text-zinc-400">Submitting details to concierge...</p>
+              <p class="text-[10px] text-zinc-400">{{ currentLang === 'am' ? 'ዝርዝሮችን ለሪዞርት አስተናጋጅ በመላክ ላይ...' : 'Submitting details to concierge...' }}</p>
             </div>
 
             <!-- Action buttons -->
@@ -227,13 +227,13 @@ const confirmBooking = () => {
                 @click="showBookingModal = false"
                 class="px-5 py-2.5 rounded-xl border border-zinc-200 dark:border-zinc-800 text-xs font-bold transition hover:bg-zinc-50 dark:hover:bg-zinc-800"
               >
-                Cancel
+                {{ currentLang === 'am' ? 'ሰርዝ' : 'Cancel' }}
               </button>
               <button 
                 @click="confirmBooking"
                 class="px-5 py-2.5 rounded-xl bg-emerald-500 text-white text-xs font-bold transition hover:bg-emerald-600 shadow shadow-emerald-500/10"
               >
-                Confirm Booking
+                {{ currentLang === 'am' ? 'ቦታ ማስያዙን አረጋግጥ' : 'Confirm Booking' }}
               </button>
             </div>
           </div>

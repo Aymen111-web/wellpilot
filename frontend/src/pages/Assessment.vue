@@ -19,6 +19,49 @@ const showResults = ref(false);
 const errorMsg = ref('');
 const resultData = ref(null);
 
+// Booking modal simulation
+const showBookingModal = ref(false);
+const selectedActivity = ref(null);
+const isBookingSuccess = ref(false);
+const isBookingLoading = ref(false);
+
+const getCategoryTranslations = (category) => {
+  const mapping = {
+    'All': 'filterAll',
+    'Stress': 'filterStress',
+    'Sleep': 'filterSleep',
+    'Physical Activity': 'filterActivity',
+    'Hydration': 'filterHydration',
+    'Mood': 'filterMood'
+  };
+  return t.value.resorts[mapping[category] || 'filterAll'];
+};
+
+const getCategoryIcon = (category) => {
+  const icons = {
+    'Stress': '💆‍♀️',
+    'Sleep': '🛌',
+    'Physical Activity': '🧘‍♂️',
+    'Hydration': '🥤',
+    'Mood': '🎨'
+  };
+  return icons[category] || '🌿';
+};
+
+const openBooking = (activity) => {
+  selectedActivity.value = activity;
+  isBookingSuccess.value = false;
+  showBookingModal.value = true;
+};
+
+const confirmBooking = () => {
+  isBookingLoading.value = true;
+  setTimeout(() => {
+    isBookingLoading.value = false;
+    isBookingSuccess.value = true;
+  }, 1000);
+};
+
 const resetForm = () => {
   nickname.value = '';
   stressLevel.value = 5;
@@ -51,6 +94,7 @@ const submitAssessment = async () => {
       water_intake: parseFloat(waterIntake.value),
       activity_level: activityLevel.value,
       mood_level: moodLevel.value,
+      lang: currentLang.value,
     });
 
     resultData.value = response.data;
@@ -365,6 +409,48 @@ const getZoneColor = (score) => {
 
       </div>
 
+      <!-- Recommended Resort Experiences section -->
+      <div v-if="resultData?.recommended_resorts && resultData.recommended_resorts.length > 0" class="space-y-6 pt-6 border-t border-zinc-200/40 dark:border-zinc-800/40 animate-fade-in">
+        <div class="text-center md:text-left space-y-1">
+          <span class="text-xs uppercase font-extrabold tracking-widest text-emerald-600 dark:text-emerald-400">
+            {{ currentLang === 'am' ? 'የተመረጡ የሪዞርት ተሞክሮዎች' : 'Recommended Resort Experiences' }}
+          </span>
+          <h3 class="text-xl font-bold text-zinc-900 dark:text-white">
+            {{ currentLang === 'am' ? 'ለእርስዎ የተመረጡ ልዩ ተግባራት' : 'Tailored Activities from Our Catalogue' }}
+          </h3>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+          <div 
+            v-for="act in resultData.recommended_resorts" 
+            :key="act.id"
+            class="group rounded-2xl bg-zinc-50 dark:bg-zinc-950/40 border border-zinc-200/40 dark:border-zinc-800/40 p-5 flex flex-col justify-between shadow-sm relative overflow-hidden"
+          >
+            <div class="space-y-3">
+              <span class="px-2.5 py-0.5 rounded-full border border-emerald-500/20 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-[9px] font-extrabold uppercase tracking-wider inline-flex items-center space-x-1">
+                <span>{{ getCategoryIcon(act.wellness_category) }}</span>
+                <span>{{ getCategoryTranslations(act.wellness_category) }}</span>
+              </span>
+              <h4 class="text-sm font-bold text-zinc-900 dark:text-white group-hover:text-emerald-500 transition-colors">
+                {{ currentLang === 'am' ? act.activity_name_am : act.activity_name }}
+              </h4>
+              <p class="text-xs text-zinc-500 dark:text-zinc-400 leading-relaxed">
+                {{ currentLang === 'am' ? act.description_am : act.description }}
+              </p>
+            </div>
+            
+            <div class="mt-4 pt-3 border-t border-zinc-200/30 dark:border-zinc-800/30 flex justify-end">
+              <button 
+                @click="openBooking(act)"
+                class="px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-[10px] tracking-wider uppercase rounded-lg transition shadow-md cursor-pointer"
+              >
+                {{ t.resorts.bookBtn }}
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <!-- Result CTA Actions -->
       <div class="flex flex-col sm:flex-row items-center justify-end gap-4 pt-4 border-t border-zinc-200/40 dark:border-zinc-800/40">
         <button 
@@ -383,6 +469,90 @@ const getZoneColor = (score) => {
       </div>
 
     </div>
+
+    <!-- Booking Simulator Modal Overlay -->
+    <transition
+      enter-active-class="transition duration-300 ease-out"
+      enter-from-class="opacity-0"
+      enter-to-class="opacity-100"
+      leave-active-class="transition duration-200 ease-in"
+      leave-from-class="opacity-100"
+      leave-to-class="opacity-0"
+    >
+      <div v-if="showBookingModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-zinc-950/80 backdrop-blur-sm">
+        
+        <!-- Glassmorphic Modal Body -->
+        <div class="bg-white dark:bg-zinc-900 border border-zinc-200/50 dark:border-zinc-800/50 rounded-3xl max-w-lg w-full p-6 sm:p-8 shadow-2xl relative overflow-hidden animate-zoom-in">
+          
+          <div class="absolute top-4 right-4">
+            <button @click="showBookingModal = false" class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-400">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
+              </svg>
+            </button>
+          </div>
+
+          <!-- Pending Modal State -->
+          <div v-if="!isBookingSuccess" class="space-y-6">
+            <div class="space-y-2">
+              <span class="text-xs uppercase font-extrabold tracking-widest text-zinc-400">{{ currentLang === 'am' ? 'የቦታ ማስያዝ ዝርዝሮች' : 'Reservation Details' }}</span>
+              <h3 class="text-xl font-bold text-zinc-900 dark:text-white">
+                {{ currentLang === 'am' ? selectedActivity?.activity_name_am : selectedActivity?.activity_name }}
+              </h3>
+              <p class="text-xs text-zinc-500 leading-relaxed">{{ currentLang === 'am' ? selectedActivity?.description_am : selectedActivity?.description }}</p>
+            </div>
+
+            <!-- Loader indicator -->
+            <div v-if="isBookingLoading" class="flex flex-col items-center justify-center py-6 space-y-2">
+              <div class="w-8 h-8 rounded-full border-2 border-emerald-500/20 border-t-emerald-500 animate-spin"></div>
+              <p class="text-[10px] text-zinc-400">{{ currentLang === 'am' ? 'ዝርዝሮችን ለሪዞርት አስተናጋጅ በመላክ ላይ...' : 'Submitting details to concierge...' }}</p>
+            </div>
+
+            <!-- Action buttons -->
+            <div v-else class="flex gap-3 justify-end pt-4 border-t border-zinc-200/40 dark:border-zinc-800/40">
+              <button 
+                @click="showBookingModal = false"
+                class="px-5 py-2.5 rounded-xl border border-zinc-200 dark:border-zinc-800 text-xs font-bold transition hover:bg-zinc-50 dark:hover:bg-zinc-800"
+              >
+                {{ currentLang === 'am' ? 'ሰርዝ' : 'Cancel' }}
+              </button>
+              <button 
+                @click="confirmBooking"
+                class="px-5 py-2.5 rounded-xl bg-emerald-500 text-white text-xs font-bold transition hover:bg-emerald-600 shadow shadow-emerald-500/10"
+              >
+                {{ currentLang === 'am' ? 'ቦታ ማስያዙን አረጋግጥ' : 'Confirm Booking' }}
+              </button>
+            </div>
+          </div>
+
+          <!-- Success Modal State -->
+          <div v-else class="text-center py-6 space-y-6">
+            <div class="w-16 h-16 bg-emerald-500/10 border border-emerald-500/20 rounded-full flex items-center justify-center mx-auto text-emerald-500 animate-bounce">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+              </svg>
+            </div>
+            
+            <div class="space-y-2">
+              <h3 class="text-xl font-bold text-zinc-900 dark:text-white">
+                {{ t.resorts.bookingSuccess }}
+              </h3>
+              <p class="text-sm text-zinc-500 dark:text-zinc-400 max-w-sm mx-auto leading-relaxed">
+                {{ t.resorts.bookingSuccessDesc }}
+              </p>
+            </div>
+
+            <button 
+              @click="showBookingModal = false"
+              class="w-full sm:w-auto px-6 py-2.5 rounded-xl bg-emerald-500 text-white text-xs font-bold tracking-wider hover:bg-emerald-600 transition"
+            >
+              {{ t.resorts.closeBtn }}
+            </button>
+          </div>
+
+        </div>
+      </div>
+    </transition>
 
   </div>
 </template>

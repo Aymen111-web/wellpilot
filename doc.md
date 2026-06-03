@@ -646,7 +646,7 @@ Examples:
 User: "I am tired."
 
 Good Response:
-"Try drinking water, taking a short break, and getting enough sleep tonight."
+"Hello, I am WellPilot AI Coach, I can help you with that, Try drinking water, taking a short break, and getting enough sleep tonight."
 
 Bad Response:
 "Welcome to WellPilot AI Coach. I am here to help you. Since you are tired..."
@@ -658,7 +658,122 @@ Good Response:
 
 Bad Response:
 "ወደ WellPilot AI Coach እንኳን ደህና መጡ..."
+🤖 AI Coach Behavior
+The AI Coach (powered by Gemini) follows these rules:
 
+Responds in the same language as the user (English or Amharic)
+Provides short, practical wellness advice (2–4 sentences)
+Covers: sleep, hydration, exercise, stress management, skincare, and general wellness
+Does not diagnose diseases or claim to be a doctor
+Maintains a supportive, friendly, professional tone
 The Ai should be General Ai assistant , it can answer  about anything.
 and it should be able to access the internet to get the latest information.
 and it should be able to access the local files to get the local information.
+
+ Resort Recommendation Logic
+Recommendations are generated based on assessment scores:
+ConditionRecommended ActivitiesHigh Stress (score < 40)Spa therapy, Meditation, Nature walks, Relaxation sessionsLow Activity (activity ≤ 3)Swimming, Fitness programs, Yoga sessionsPoor Sleep (< 6 hrs)Sleep wellness programs, Relaxation retreatsGood Wellness (score ≥ 75)Adventure activities, Social wellness events
+
+Create a Wellness Challenges module with the following requirements:
+
+## Challenge Completion
+
+Each challenge should have a "Mark Complete" button.
+
+Example:
+
+[✓ Mark Complete]
+
+When the user clicks the button:
+
+* Mark the challenge as completed.
+* Save the completion date and time.
+* Award the challenge points.
+* Update the user's wellness progress statistics.
+
+## Daily Category Restriction
+
+A user can complete only one challenge per category per day.
+
+Example:
+
+* Hydration → 1 challenge/day
+* Sleep → 1 challenge/day
+* Physical Activity → 1 challenge/day
+* Mental Wellness → 1 challenge/day
+* Nutrition → 1 challenge/day
+* Self-Care → 1 challenge/day
+
+If the user tries to complete another challenge in the same category on the same day, display:
+
+"You have already completed a challenge in this category today. Please come back tomorrow."
+
+## Reflection Feature
+
+Immediately after a challenge is marked as complete, open a reflection modal.
+
+Title:
+
+"How did you feel after completing this challenge?"
+
+Input:
+
+Multiline text area
+
+Placeholder:
+
+"Example: I feel more energetic and refreshed."
+
+Buttons:
+
+* Save Reflection
+* Skip
+
+The reflection is optional.
+
+## Reflection Storage
+
+Store:
+
+* challenge_id
+* reflection_text
+* completion_date
+
+## User Experience
+
+After completion display:
+
+🎉 Challenge Completed!
+
+You earned wellness points.
+
+Keep building healthy habits and come back tomorrow for more challenges.
+
+## Dashboard Integration
+
+Display:
+
+* Total Challenges Completed
+* Current Streak
+* Wellness Points
+* Recent Reflections
+
+Example Reflection Card:
+
+Challenge: Drink 2 Liters of Water
+
+Reflection:
+"I feel more energetic."
+
+Date:
+Today
+
+## Design Requirements
+
+* Modern wellness-focused UI
+* Clean cards
+* Progress indicators
+* Mobile responsive
+* Positive and encouraging tone
+* Use Vue.js components and Laravel API endpoints
+* Store data in MySQL
