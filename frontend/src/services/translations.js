@@ -1,0 +1,259 @@
+import { ref, computed } from 'vue';
+
+const currentLang = ref(localStorage.getItem('wellpilot_lang') || 'en');
+
+export function useLanguage() {
+  const toggleLanguage = () => {
+    currentLang.value = currentLang.value === 'en' ? 'am' : 'en';
+    localStorage.setItem('wellpilot_lang', currentLang.value);
+  };
+
+  const setLanguage = (lang) => {
+    currentLang.value = lang;
+    localStorage.setItem('wellpilot_lang', lang);
+  };
+
+  const t = computed(() => translations[currentLang.value]);
+
+  return {
+    currentLang,
+    toggleLanguage,
+    setLanguage,
+    t
+  };
+}
+
+export const translations = {
+  en: {
+    nav: {
+      home: 'Home',
+      assessment: 'Wellness Assessment',
+      dashboard: 'Dashboard',
+      aiCoach: 'AI Coach',
+      resorts: 'Resort Experiences',
+      challenges: 'Challenges',
+      toggleLang: 'አማርኛ'
+    },
+    home: {
+      heroTitle: 'Heal. Build. Thrive.',
+      heroSubtitle: 'Welcome to WellPilot. Experience the next generation of AI-driven digital wellness integrated with luxurious resort health retreats.',
+      startAssessment: 'Start Wellness Assessment',
+      exploreDashboard: 'View Analytics Dashboard',
+      coreModules: 'Core Wellness Modules',
+      assessmentDesc: 'Evaluate your physical and mental balance. Log stress, sleep, hydration, and activity levels in our elegant questionnaire to compute your interactive wellness score.',
+      aiCoachDesc: 'Interact with your 24/7 digital wellness coach. Get empathetic, science-backed advice, custom meditation, and customized wind-down recommendations.',
+      dashboardDesc: 'Visualize your long-term health trends. Track metrics through dynamic progress trackers, charts, and automated body-mind harmony insights.',
+      resortsDesc: 'Connect digital assessments to physical resort activities. Tailor luxury experiences like crystal sound baths, mineral hot spring soaks, or sunset kayaking to your exact wellness gaps.',
+      challengesDesc: 'Build healthy habits through gamified challenges. Participate in water intake, sleep, or walking schedules and earn points to redeem at partner resorts.'
+    },
+    assessment: {
+      title: 'Personal Wellness Assessment',
+      subtitle: 'Complete this questionnaire to analyze your current body-mind harmony and receive custom AI-driven resort recommendations.',
+      nicknameLabel: 'What is your nickname?',
+      nicknamePlh: 'e.g. Selam, Alex...',
+      stressLabel: 'Stress Level (1 - Very Relaxed, 10 - Extreme Burnout)',
+      sleepLabel: 'Average Nightly Sleep (Hours)',
+      waterLabel: 'Daily Water Intake (Liters)',
+      activityLabel: 'Physical Activity Level',
+      activityLow: 'Low (Sedentary / Desk Job)',
+      activityMedium: 'Medium (Moderate exercise / Daily walks)',
+      activityHigh: 'High (Active sports / High intensity workouts)',
+      moodLabel: 'How is your overall mood today?',
+      moodSad: 'Sad / Exhausted',
+      moodStressed: 'Stressed / Anxious',
+      moodNeutral: 'Neutral / Balanced',
+      moodHappy: 'Happy / Content',
+      moodExcited: 'Excited / Energetic',
+      submitBtn: 'Calculate Wellness Profile',
+      submitting: 'Analyzing wellness markers using AI...',
+      resultTitle: 'Your Wellness Profile',
+      scoreLabel: 'Wellness Score',
+      scoreZone: 'Wellness Zone',
+      recommendationsHeader: 'Actionable Insights',
+      retakeBtn: 'Take Assessment Again',
+      dashboardBtn: 'Go to Dashboard',
+      validationErr: 'Please fill in all the required fields correctly.'
+    },
+    dashboard: {
+      title: 'Wellness Analytics & Trends',
+      subtitle: 'Track your historic health metrics, monitor stress and sleep fluctuations, and view dynamic wellness trajectory charts.',
+      scoreCard: 'Current Score',
+      stressCard: 'Stress Level',
+      sleepCard: 'Sleep Duration',
+      waterCard: 'Hydration Intake',
+      activityCard: 'Activity Level',
+      moodCard: 'Overall Mood',
+      activityLow: 'Low',
+      activityMedium: 'Medium',
+      activityHigh: 'High',
+      chartHeader: 'Wellness Trajectory History',
+      noDataTitle: 'No Assessment History Found',
+      noDataDesc: 'You haven\'t completed a wellness assessment yet. Complete an assessment to see detailed data trends and custom charts.',
+      insightsHeader: 'AI Personal Growth Recommendations',
+      recommendationsPlh: 'Complete your first wellness assessment to unlock tailored AI tips and resort activities based on your health metrics.'
+    },
+    aiCoach: {
+      title: 'AI Wellness Coach',
+      subtitle: 'Empathetic, digital guidance on stress, sleep hygiene, cellular hydration, and mindful fitness. Empowering your self-healing journey.',
+      placeholder: 'Ask your AI Wellness Coach anything (e.g., "I feel exhausted, what should I do?" or "How can I sleep better?")...',
+      sendBtn: 'Send',
+      offlineNotice: 'AI Coach is running in offline wellness expert mode. Add a GEMINI_API_KEY to unlock dynamic, contextual AI conversations.',
+      speakBtn: 'Speak Response',
+      voiceStopBtn: 'Stop Audio',
+      welcomeMsg: 'Welcome to your personalized WellPilot AI Wellness Space! I am here to help you *heal, build, and thrive*.\n\nHow is your energy level today, and what specific area of your physical or mental well-being would you like to explore or improve?',
+      voiceModeBtn: 'Live Voice Mode',
+      exitVoiceModeBtn: 'Exit Voice Mode',
+      voiceListening: 'Listening to you...',
+      voiceThinking: 'Thinking...',
+      voiceSpeaking: 'AI Coach is speaking...',
+      voiceIdle: 'Click Pulsing Orb to Speak',
+      voiceMuted: 'Muted',
+      voiceUnmuted: 'Unmuted',
+      voiceStartSession: 'Start Voice Session',
+      voiceStopSession: 'Stop Voice Session',
+      voiceError: 'Voice session error, please try again.'
+    },
+    resorts: {
+      title: 'Tailored Resort Experiences',
+      subtitle: 'Luxury resort activities specifically selected to balance your wellness deficits and elevate your lifestyle.',
+      filterAll: 'All Experiences',
+      filterStress: 'Stress Relief',
+      filterSleep: 'Restorative Sleep',
+      filterActivity: 'Mindful Fitness',
+      filterHydration: 'Hydration & Nutrition',
+      filterMood: 'Mood Booster',
+      bookBtn: 'Reserve Experience',
+      bookingSuccess: 'Experience Reserved!',
+      bookingSuccessDesc: 'Your request has been successfully submitted. The resort concierge team will reach out shortly to finalize your appointment.',
+      closeBtn: 'Close'
+    },
+    challenges: {
+      title: 'Habit-Building Challenges',
+      subtitle: 'Enroll in structured challenges designed by health experts to build micro-habits, stay consistent, and earn rewards.',
+      pointsHeader: 'Your Reward Balance',
+      pointsDesc: 'Redeem these points at resort check-outs, massage bookings, or fresh elixir bars.',
+      daysText: 'Days',
+      pointsText: 'Points',
+      joinBtn: 'Join Challenge',
+      activeStatus: 'Active',
+      completedStatus: 'Completed!',
+      logDayBtn: 'Log Today\'s Progress'
+    }
+  },
+  am: {
+    nav: {
+      home: 'መነሻ ገጽ',
+      assessment: 'የጤና ግምገማ',
+      dashboard: 'የክትትል ገጽ',
+      aiCoach: 'የኤአይ አማካሪ',
+      resorts: 'የሪዞርት ተሞክሮዎች',
+      challenges: 'ተግዳሮቶች',
+      toggleLang: 'English'
+    },
+    home: {
+      heroTitle: 'ፈውስ። ግንባታ። ብልጽግና።',
+      heroSubtitle: 'ወደ ዌልፓይለት (WellPilot) እንኳን ደህና መጡ። በምርጥ የኤአይ ቴክኖሎጂ የታገዘ የዲጂታል ጤና ክትትልን ከቅንጡ የሪዞርት ማገገሚያዎች ጋር ያዋሃደ አዲስ ስርዓት።',
+      startAssessment: 'የጤና ግምገማ ጀምር',
+      exploreDashboard: 'የክትትል ገጽን ይመልከቱ',
+      coreModules: 'ዋና የጤና ክፍሎች',
+      assessmentDesc: 'የአካልና የአእምሮ ሚዛንዎን ይገምግሙ። ጭንቀትን፣ እንቅልፍን፣ የውሃ አወሳሰድንና የአካል ብቃት እንቅስቃሴን በመመዝገብ በይነተገናኝ የጤና ውጤትዎን ያግኙ።',
+      aiCoachDesc: 'በቀን 24 ሰዓት ከዲጂታል የኤአይ ጤና አማካሪዎ ጋር ይነጋገሩ። በእውቀት ላይ የተመሰረተ ምክር፣ የስነ-አእምሮ ማረጋጊያ እና የዝግጅት ልምምዶችን ያግኙ።',
+      dashboardDesc: 'የረጅም ጊዜ የጤና ሂደትዎን ይመልከቱ። በተለያዩ ቻርቶች እና ግራፎች የሰውነትዎን እና የአእምሮዎን ውህደት በቀላሉ ይከታተሉ።',
+      resortsDesc: 'የዲጂታል ግምገማ ውጤትን ከእውነተኛ የሪዞርት እንቅስቃሴዎች ጋር ያገናኙ። እንደ ክሪስታል የድምፅ መታጠቢያ፣ የተፈጥሮ ፍልውሃዎች እና የፀሐይ መጥለቂያ ካያኪንግ ያሉ የቅንጦት ተሞክሮዎችን ከጤናዎ ፍላጎት ጋር ያጣጥሙ።',
+      challengesDesc: 'በፈተናዎች እና ተግዳሮቶች ጤናማ ልምዶችን ይገንቡ። በውሃ መጠጣት፣ እንቅልፍ እና የእግር ጉዞ ተግዳሮቶች ላይ በመሳተፍ በሪዞርቶች የሚቀየሩ ነጥቦችን ያግኙ።'
+    },
+    assessment: {
+      title: 'የግል የጤና ግምገማ',
+      subtitle: 'የአካልና የአእምሮዎን ጤና ለመገምገም እና ተስማሚ የሪዞርት ተሞክሮዎችን ለማግኘት እባክዎን ይህንን መጠይቅ ያጠናቅቁ።',
+      nicknameLabel: 'ቅጽል ስምዎ ማነው?',
+      nicknamePlh: 'ምሳሌ፦ ሰላም፣ አሌክስ...',
+      stressLabel: 'የጭንቀት መጠን (1 - በጣም ዘና ያለ፣ 10 - ከፍተኛ ድካም/ጭንቀት)',
+      sleepLabel: 'አማካይ የሌሊት እንቅልፍ (በሰዓታት)',
+      waterLabel: 'የዕለታዊ የውሃ አወሳሰድ (በሊትር)',
+      activityLabel: 'የአካል ብቃት እንቅስቃሴ ደረጃ',
+      activityLow: 'ዝቅተኛ (ብዙ ጊዜ መቀመጥ / የቢሮ ስራ)',
+      activityMedium: 'መካከለኛ (ቀላል እንቅስቃሴ / ዕለታዊ የእግር ጉዞ)',
+      activityHigh: 'ከፍተኛ (ስፖርተኛ / ጠንካራ የአካል ብቃት እንቅስቃሴ)',
+      moodLabel: 'ዛሬ አጠቃላይ ስሜትዎ እንዴት ነው?',
+      moodSad: 'ያዘነ / የደከመ',
+      moodStressed: 'የተጨነቀ / የፈራ',
+      moodNeutral: 'መካከለኛ / ሚዛናዊ',
+      moodHappy: 'ደስተኛ / ረክቻለሁ',
+      moodExcited: 'በጣም ደስተኛ / ንቁ',
+      submitBtn: 'የጤና ፕሮፋይል አስላ',
+      submitting: 'በኤአይ በመታገዝ የጤና አመልካቾችን በመተንተን ላይ...',
+      resultTitle: 'የጤናዎ ውጤት',
+      scoreLabel: 'የጤና ውጤት',
+      scoreZone: 'የጤና ደረጃ',
+      recommendationsHeader: 'ሊተገበሩ የሚችሉ ምክሮች',
+      retakeBtn: 'እንደገና ግምገማ ውሰድ',
+      dashboardBtn: 'ወደ ክትትል ገጽ ሂድ',
+      validationErr: 'እባክዎን ሁሉንም አስፈላጊ ቦታዎች በትክክል ይሙሉ::'
+    },
+    dashboard: {
+      title: 'የጤና ክትትልና አዝማሚያዎች',
+      subtitle: 'የቀደሙ የጤና መረጃዎችዎን ይከታተሉ፣ የጭንቀትና የእንቅልፍ መለዋወጥን ይቆጣጠሩ፣ እና የጤና ጉዞዎን በቻርት ይመልከቱ።',
+      scoreCard: 'የአሁኑ ውጤት',
+      stressCard: 'የጭንቀት መጠን',
+      sleepCard: 'የእንቅልፍ ሰዓት',
+      waterCard: 'የውሃ መጠኑ',
+      activityCard: 'የእንቅስቃሴ ደረጃ',
+      moodCard: 'አጠቃላይ ስሜት',
+      activityLow: 'ዝቅተኛ',
+      activityMedium: 'መካከለኛ',
+      activityHigh: 'ከፍተኛ',
+      chartHeader: 'የጤና ለውጥ ሂደት',
+      noDataTitle: 'ምንም የጤና መረጃ አልተገኘም',
+      noDataDesc: 'እስካሁን ምንም የጤና ግምገማ አላደረጉም። ዝርዝር መረጃዎችን እና የጤና ቻርት ለማየት እባክዎን የመጀመሪያውን ግምገማዎን ያጠናቅቁ።',
+      insightsHeader: 'የኤአይ የግል እድገት ምክሮች',
+      recommendationsPlh: 'በጤና መረጃዎ ላይ የተመሰረቱ የኤአይ ምክሮችን እና የሪዞርት እንቅስቃሴዎችን ለማግኘት እባክዎን የመጀመሪያውን የጤና ግምገማዎን ያጠናቅቁ።'
+    },
+    aiCoach: {
+      title: 'የኤአይ ጤና አማካሪ',
+      subtitle: 'ስለ ጭንቀት፣ እንቅልፍ፣ የውሃ አወሳሰድ እና የአእምሮ ሰላም የሚረዳዎት የዲጂታል ጤና መሪዎ። ራስን የመፈወስ ጉዞዎን ያግዙ።',
+      placeholder: 'የኤአይ ጤና አማካሪዎን ማንኛውንም ነገር ይጠይቁ (ለምሳሌ፦ "በጣም ደክሞኛል፣ ምን ማድረግ አለብኝ?" ወይም "እንዴት እንቅልፌን ማስተካከል እችላለሁ?")...',
+      sendBtn: 'ላክ',
+      offlineNotice: 'የኤአይ አማካሪው ከመስመር ውጭ በባለሙያ ሁነታ ላይ ነው የሚሰራው። የ GEMINI_API_KEY በማስገባት የተሟላ የኤአይ ውይይት ያግኙ።',
+      speakBtn: 'ምላሹን ድምፅ አሰማ',
+      voiceStopBtn: 'ድምፅ አቁም',
+      welcomeMsg: 'እንኳን ወደ WellPilot AI ጤና አማካሪ ቦታዎ በደህና መጡ! *ለመፈወስ፣ ለመገንባት እና ለመበልጸግ* ልረዳዎ እዚህ እገኛለሁ።\n\nዛሬ ጉልበትዎ እንዴት ነው? የትኛውን የአካል ወይም የአእምሮ ጤናዎን ክፍል ማሻሻል ይፈልጋሉ?',
+      voiceModeBtn: 'በድምፅ ለመነጋገር',
+      exitVoiceModeBtn: 'ከድምፅ ሁነታ ውጣ',
+      voiceListening: 'እየሰማሁ ነው...',
+      voiceThinking: 'እያሰላሁ ነው...',
+      voiceSpeaking: 'አማካሪው እየተናገረ ነው...',
+      voiceIdle: 'ለመናገር ድቡልቡሉን ይጫኑ',
+      voiceMuted: 'ድምፅ አልባ',
+      voiceUnmuted: 'ድምፅ አብራ',
+      voiceStartSession: 'የድምፅ ውይይት ጀምር',
+      voiceStopSession: 'የድምፅ ውይይት አቁም',
+      voiceError: 'የድምፅ ውይይት ስህተት አጋጥሟል፣ እባክዎን እንደገና ይሞክሩ።'
+    },
+    resorts: {
+      title: 'የተመረጡ የሪዞርት ተሞክሮዎች',
+      subtitle: 'ለጤናዎ ሚዛን ማስተካከያ እና ለኑሮ ዘይቤዎ ተስማሚ ሆነው የተመረጡ የቅንጦት ሪዞርት እንቅስቃሴዎች።',
+      filterAll: 'ሁሉንም ተሞክሮዎች',
+      filterStress: 'ጭንቀትን ማስወገጃ',
+      filterSleep: 'ጥልቅ እንቅልፍ ማግኛ',
+      filterActivity: 'የአእምሮና አካል ብቃት',
+      filterHydration: 'ፈሳሽና ስነ-ምግብ',
+      filterMood: 'ስሜት ማሻሻያ',
+      bookBtn: 'ቦታ አስይዝ',
+      bookingSuccess: 'ቦታው ተይዟል!',
+      bookingSuccessDesc: 'ቦታ የማስያዝ ጥያቄዎ በተሳካ ሁኔታ ተልኳል። የሪዞርት አስተናጋጅ ቡድናችን ቀጠሮዎን ለማረጋገጥ በቅርቡ ያነጋግርዎታል።',
+      closeBtn: 'ዝጋ'
+    },
+    challenges: {
+      title: 'ጤናማ ልምድ መገንቢያዎች',
+      subtitle: 'ጤናማ ልምዶችን ለማዳበር፣ ቀጣይነት እንዲኖርዎት እና ሽልማቶችን ለማግኘት በጤና ባለሙያዎች በተዘጋጁ ፈተናዎች ላይ ይሳተፉ።',
+      pointsHeader: 'የሽልማት ነጥቦችዎ',
+      pointsDesc: 'እነዚህን ነጥቦች በሪዞርቱ ለክፍያ፣ ለማሳጅ ወይም ለትኩስ ጁስ መጠቀም ይችላሉ።',
+      daysText: 'ቀናት',
+      pointsText: 'ነጥቦች',
+      joinBtn: 'ተሳተፍ',
+      activeStatus: 'በእንቅስቃሴ ላይ',
+      completedStatus: 'ተጠናቋል!',
+      logDayBtn: 'የዛሬውን እድገት መዝግብ'
+    }
+  }
+};
