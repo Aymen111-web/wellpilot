@@ -28,13 +28,22 @@ const updateThemeClass = () => {
   }
 };
 
+const activeNickname = ref(localStorage.getItem('wellpilot_nickname'));
+
+const logout = () => {
+  localStorage.removeItem('wellpilot_nickname');
+  activeNickname.value = null;
+  router.push('/login');
+};
+
 onMounted(() => {
   updateThemeClass();
 });
 
-// Close mobile menu on route change
+// Close mobile menu on route change & update nickname
 watch(() => router.currentRoute.value.path, () => {
   isMobileMenuOpen.value = false;
+  activeNickname.value = localStorage.getItem('wellpilot_nickname');
 });
 </script>
 
@@ -78,6 +87,17 @@ watch(() => router.currentRoute.value.path, () => {
         <!-- Right Side Toggles -->
         <div class="hidden md:flex items-center space-x-3">
           
+          <!-- User Profile Display & Switcher (only if logged in) -->
+          <div v-if="activeNickname" class="flex items-center space-x-2 bg-emerald-500/10 border border-emerald-500/20 px-3 py-1.5 rounded-full text-xs font-semibold text-emerald-600 dark:text-emerald-400">
+            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+            <span class="max-w-[80px] truncate" :title="activeNickname">{{ activeNickname }}</span>
+            <button @click="logout" class="ml-1 text-zinc-400 hover:text-rose-500 transition-colors cursor-pointer" title="Switch Profile">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+              </svg>
+            </button>
+          </div>
+
           <!-- Language Toggle Button -->
           <button @click="toggleLanguage" class="flex items-center space-x-1 px-3 py-1.5 rounded-full border border-zinc-200 dark:border-zinc-800 text-xs font-semibold hover:bg-zinc-100 dark:hover:bg-zinc-900 transition-all duration-300 text-teal-600 dark:text-teal-400">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -139,6 +159,20 @@ watch(() => router.currentRoute.value.path, () => {
       leave-to-class="transform -translate-y-4 opacity-0"
     >
       <div v-if="isMobileMenuOpen" class="md:hidden sticky top-[73px] z-40 w-full bg-white dark:bg-zinc-900 border-b border-zinc-200/50 dark:border-zinc-800/50 px-4 py-4 space-y-2 shadow-xl">
+        <!-- User Profile Display & Switcher for Mobile (only if logged in) -->
+        <div v-if="activeNickname" class="flex items-center justify-between px-4 py-2.5 bg-emerald-500/10 border border-emerald-500/20 rounded-xl text-xs font-semibold text-emerald-600 dark:text-emerald-400 mb-2">
+          <div class="flex items-center space-x-1.5">
+            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+            <span class="max-w-[120px] truncate">{{ activeNickname }}</span>
+          </div>
+          <button @click="logout" class="flex items-center space-x-1 text-rose-500 font-bold hover:underline cursor-pointer">
+            <span>Switch Profile</span>
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+            </svg>
+          </button>
+        </div>
+
         <RouterLink to="/" class="block px-4 py-3 rounded-lg text-base font-semibold transition-all duration-200" active-class="bg-emerald-500 text-white shadow-md">
           {{ t.nav.home }}
         </RouterLink>

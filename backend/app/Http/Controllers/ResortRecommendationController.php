@@ -15,16 +15,20 @@ class ResortRecommendationController extends Controller
 
         // Retrieve latest assessment for the provided nickname if any
         $assessment = null;
+        $user = null;
         if ($nickname) {
-            $assessment = WellnessAssessment::where('nickname', $nickname)
-                ->orderBy('created_at', 'desc')
-                ->first();
+            $user = \App\Models\User::where('nickname', $nickname)->first();
+            if ($user) {
+                $assessment = WellnessAssessment::where('user_id', $user->id)
+                    ->orderBy('created_at', 'desc')
+                    ->first();
+            }
         }
 
         // Fallback default mock assessment if no history is found
         if (!$assessment) {
             $assessment = new WellnessAssessment([
-                'nickname' => $nickname ?: 'Guest',
+                'user_id' => $user ? $user->id : null,
                 'stress_level' => 5,
                 'sleep_hours' => 7.5,
                 'water_intake' => 2.5,
@@ -137,7 +141,7 @@ class ResortRecommendationController extends Controller
                 if (!isset($reasons[$act->id])) {
                     $reasons[$act->id] = [
                         'why' => "Recommended because of your excellent wellness profile ({$score}/100) to keep you active, social, and thriving.",
-                        'why_am' => "ምርጥ የጤና ውጤት (${score}/100) ስላስመዘገቡ፣ ንቁ እና ማህበራዊ ሆነው እንዲቀጥሉ ተመርጧል።"
+                        'why_am' => "ምርጥ የጤና ውጤት ({$score}/100) ስላስመዘገቡ፣ ንቁ እና ማህበራዊ ሆነው እንዲቀጥሉ ተመርጧል።"
                     ];
                 }
             }
@@ -155,14 +159,17 @@ class ResortRecommendationController extends Controller
             }
         }
 
-        // De-duplicate matched list by ID
-        $matched = $matched->unique('id')->values();
+        // De-duplicate matched list by wellness_category to ensure unique categories
+        $matched = $matched->unique('wellness_category')->values();
 
         // Enforce Limits (Min 2, Max 4)
         if ($matched->count() > 4) {
             $matched = $matched->take(4);
         } elseif ($matched->count() < 2) {
-            $fillers = ResortRecommendation::whereNotIn('id', $matched->pluck('id'))->get();
+            $matchedCategories = $matched->pluck('wellness_category')->toArray();
+            $fillers = ResortRecommendation::whereNotIn('wellness_category', $matchedCategories)
+                ->get()
+                ->unique('wellness_category');
             $needed = 2 - $matched->count();
             $matched = $matched->merge($fillers->take($needed));
         }
@@ -179,8 +186,8 @@ class ResortRecommendationController extends Controller
         });
 
         return response()->json([
-            'nickname' => $assessment->nickname,
-            'has_history' => $nickname && WellnessAssessment::where('nickname', $nickname)->exists(),
+            'nickname' => $user ? $user->nickname : ($nickname ?: 'Guest'),
+            'has_history' => $user && WellnessAssessment::where('user_id', $user->id)->exists(),
             'wellness_insight' => $insight,
             'recommendations' => $recommendations,
             'all_activities' => $allActivities

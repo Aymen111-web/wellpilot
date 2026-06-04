@@ -162,6 +162,16 @@ export const translations = {
       challengeLabel: 'Challenge',
       dateLabel: 'Date',
       reflectionLabel: 'Reflection'
+    },
+    login: {
+      title: 'Welcome to WellPilot',
+      subtitle: 'Please enter your unique nickname to access your wellness dashboard or get started on your journey.',
+      nicknameLabel: 'Enter Nickname',
+      nicknamePlh: 'e.g. Selam, Alex...',
+      enterBtn: 'Access Dashboard',
+      loading: 'Verifying identity...',
+      errorEmpty: 'Please enter a valid nickname.',
+      errorConnection: 'Connection failed. Please check if backend is running.'
     }
   },
   am: {
@@ -302,6 +312,16 @@ export const translations = {
       challengeLabel: 'ተግዳሮት',
       dateLabel: 'ቀን',
       reflectionLabel: 'አስተያየት'
+    },
+    login: {
+      title: 'ወደ ዌልፓይለት እንኳን ደህና መጡ',
+      subtitle: 'እባክዎን የጤና መከታተያ ገጽዎን ለማግኘት ወይም አዲስ ጉዞ ለመጀመር ቅጽል ስምዎን ያስገቡ።',
+      nicknameLabel: 'ቅጽል ስም ያስገቡ',
+      nicknamePlh: 'ምሳሌ፦ ሰላም፣ አሌክስ...',
+      enterBtn: 'ወደ መከታተያ ገጽ ይግቡ',
+      loading: 'ማንነትዎን በማረጋገጥ ላይ...',
+      errorEmpty: 'እባክዎን ትክክለኛ ቅጽል ስም ያስገቡ።',
+      errorConnection: 'ግንኙነት አልተሳካም። እባክዎን የጀርባ አገልግሎት (backend) መስራቱን ያረጋግጡ።'
     }
   }
 };

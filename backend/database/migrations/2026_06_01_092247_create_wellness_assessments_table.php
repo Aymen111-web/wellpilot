@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('wellness_assessments', function (Blueprint $table) {
             $table->id();
-            $table->string('nickname');
+            $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
             $table->integer('stress_level');
             $table->double('sleep_hours');
             $table->double('water_intake');

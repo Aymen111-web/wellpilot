@@ -127,6 +127,22 @@ class DatabaseSeeder extends Seeder
             'description_am' => 'በሞቀ የውሃ ገንዳችን ውስጥ የሚደረግ ከፍተኛ ጉልበት የሚጠይቅ የአካል ብቃት እንቅስቃሴ። ለመገጣጠሚያዎችዎ ምቹ በሆነ ሁኔታ የውሃ መቋቋምን በመጠቀም ጡንቻዎችዎን ያጠናክራል።',
         ]);
 
+        \App\Models\ResortRecommendation::create([
+            'wellness_category' => 'Physical Activity',
+            'activity_name' => 'State-of-the-Art Gym & Strength Session',
+            'activity_name_am' => 'ዘመናዊ ጂም እና የጥንካሬ ስልጠና',
+            'description' => 'Access our high-end fitness center equipped with advanced cardio machines, free weights, and personal coaching to design your custom workout.',
+            'description_am' => 'የካርዲዮ ማሽኖች፣ የክብደት ማንሻዎች እና የግል አሰልጣኝ የተሟላለትን ዘመናዊ የጂም ማዕከላችንን በመጠቀም የራስዎን የስፖርት እንቅስቃሴ ያድርጉ።',
+        ]);
+
+        \App\Models\ResortRecommendation::create([
+            'wellness_category' => 'Physical Activity',
+            'activity_name' => 'High-Energy Cardio Aerobics Class',
+            'activity_name_am' => 'ከፍተኛ ጉልበት የሚጠይቅ የካርዲዮ ኤሮቢክስ',
+            'description' => 'Join an upbeat group aerobics class designed to elevate your heart rate, boost cardiovascular health, and burn calories through rhythmic movements.',
+            'description_am' => 'የልብ ምትን የሚጨምር፣ የካርዲዮቫስኩላር ጤናን የሚያሻሽል እና የሰውነት ስብን ለመቀነስ የሚረዳ በቡድን የሚሰራ የካርዲዮ ኤሮቢክስ ስልጠና።',
+        ]);
+
         // Sleep Category
         \App\Models\ResortRecommendation::create([
             'wellness_category' => 'Sleep',

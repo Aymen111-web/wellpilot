@@ -4,21 +4,21 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class WellnessAssessment extends Model
+class ChallengeReflection extends Model
 {
     protected $fillable = [
         'user_id',
-        'stress_level',
-        'sleep_hours',
-        'water_intake',
-        'activity_level',
-        'mood_level',
-        'wellness_score',
-        'suggestions'
+        'challenge_completion_id',
+        'reflection'
     ];
 
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function challengeCompletion()
+    {
+        return $this->belongsTo(ChallengeCompletion::class);
     }
 }

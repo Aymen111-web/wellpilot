@@ -8,6 +8,7 @@ const { currentLang, t } = useLanguage();
 // Chat states
 const messages = ref([]);
 const questionInput = ref('');
+const storedNickname = ref(localStorage.getItem('wellpilot_nickname') || '');
 const isSending = ref(false);
 const chatScrollContainer = ref(null);
 const isConfigured = ref(true); // default to true, then check API config state
@@ -100,15 +101,12 @@ onMounted(() => {
     hasSpeechSynthesis.value = true;
   }
 
-  // Load nickname if available
-  const storedNickname = localStorage.getItem('wellpilot_nickname') || '';
-  
   // Set up default greeting message from AI Coach
   messages.value.push({
     sender: 'ai',
     text: currentLang.value === 'en'
-      ? `Hello ${storedNickname ? storedNickname : 'friend'}! ` + translations.en.aiCoach.welcomeMsg
-      : `ሰላም ${storedNickname ? storedNickname : 'ወዳጄ'}! ` + translations.am.aiCoach.welcomeMsg,
+      ? `Hello ${storedNickname.value ? storedNickname.value : 'friend'}! ` + translations.en.aiCoach.welcomeMsg
+      : `ሰላም ${storedNickname.value ? storedNickname.value : 'ወዳጄ'}! ` + translations.am.aiCoach.welcomeMsg,
     timestamp: new Date()
   });
 });
@@ -150,7 +148,8 @@ const sendChatMessage = async () => {
   try {
     const response = await api.post('/ai-coach', {
       question: query,
-      lang: currentLang.value
+      lang: currentLang.value,
+      nickname: storedNickname.value
     });
 
     // Add AI Message
@@ -310,7 +309,8 @@ const initContinuousRecognition = () => {
     try {
       const response = await api.post('/ai-coach', {
         question: transcript,
-        lang: currentLang.value
+        lang: currentLang.value,
+        nickname: storedNickname.value
       });
 
       const aiReply = response.data.response;

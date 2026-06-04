@@ -6,6 +6,9 @@ use App\Http\Controllers\WellnessAssessmentController;
 use App\Http\Controllers\WellnessChallengeController;
 use App\Http\Controllers\ResortRecommendationController;
 use App\Http\Controllers\AiCoachController;
+use App\Http\Controllers\UserController;
+
+Route::post('/login', [UserController::class, 'login']);
 
 Route::get('/user', function (Request $request) {
     return $request->user();

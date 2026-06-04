@@ -826,6 +826,8 @@ Recommend:
 * Swimming
 * Morning Yoga
 * Guided Fitness Activities
+* Gym Session
+* Aerobics Class
 
 Excellent Wellness Score (75+):
 Recommend:

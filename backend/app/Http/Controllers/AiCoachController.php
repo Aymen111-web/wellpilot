@@ -11,19 +11,28 @@ class AiCoachController extends Controller
         $request->validate([
             'question' => 'required|string|max:2000',
             'lang' => 'nullable|string|in:en,am',
+            'nickname' => 'nullable|string|max:191',
         ]);
 
         $question = $request->question;
+        $nickname = trim($request->input('nickname', 'Guest'));
+        $user = null;
+        $latestAssessment = null;
 
-        // Retrieve the latest wellness assessment to provide personalized context
-        $latestAssessment = \App\Models\WellnessAssessment::latest()->first();
+        if (!empty($nickname)) {
+            $user = \App\Models\User::firstOrCreate(['nickname' => $nickname]);
+            $latestAssessment = \App\Models\WellnessAssessment::where('user_id', $user->id)
+                ->latest()
+                ->first();
+        }
+
         $userContext = "";
         $promptContext = "";
         if ($latestAssessment) {
             $stressStr = ($latestAssessment->stress_level >= 7 ? 'High' : ($latestAssessment->stress_level <= 3 ? 'Low' : 'Medium'));
             $waterStr = ($latestAssessment->water_intake < 2.0 ? 'Low' : 'Good');
-            
-            $userContext = "Context about the user: Nickname is '{$latestAssessment->nickname}'. They recently scored a {$latestAssessment->wellness_score}/100 on their wellness assessment. Their metrics are: Stress level: {$latestAssessment->stress_level}/10, Sleep duration: {$latestAssessment->sleep_hours} hours/night, Hydration: {$latestAssessment->water_intake} L/day, Physical Activity: {$latestAssessment->activity_level}, Mood indicator: {$latestAssessment->mood_level}. ";
+
+            $userContext = "Context about the user: Nickname is '{$nickname}'. They recently scored a {$latestAssessment->wellness_score}/100 on their wellness assessment. Their metrics are: Stress level: {$latestAssessment->stress_level}/10, Sleep duration: {$latestAssessment->sleep_hours} hours/night, Hydration: {$latestAssessment->water_intake} L/day, Physical Activity: {$latestAssessment->activity_level}, Mood indicator: {$latestAssessment->mood_level}. ";
 
             $promptContext .= "User Wellness Profile:\n" .
                               "- Stress Level: {$stressStr} ({$latestAssessment->stress_level}/10)\n" .
@@ -197,6 +206,7 @@ class AiCoachController extends Controller
 
         // Save the conversation to the database
         \App\Models\AiConversation::create([
+            'user_id' => $user ? $user->id : null,
             'question' => $question,
             'response' => $aiResponse,
         ]);
@@ -211,7 +221,7 @@ class AiCoachController extends Controller
     {
         $q = strtolower($question);
         $keywords = ['file', 'code', 'project', 'folder', 'controller', 'route', 'model', 'view', 'vue', 'php', 'style', 'doc.md', 'erteale', 'local', 'page', 'theme', 'dark', 'light', 'amharic', 'english', 'system'];
-        
+
         $shouldFetch = false;
         foreach ($keywords as $keyword) {
             if (str_contains($q, $keyword)) {
@@ -219,34 +229,34 @@ class AiCoachController extends Controller
                 break;
             }
         }
-        
+
         if (!$shouldFetch) {
             return "";
         }
-        
+
         $basePath = base_path('..');
         $context = "Local Project Workspace Structure:\n";
-        
+
         $files = [];
         try {
             $iterator = new \RecursiveIteratorIterator(
                 new \RecursiveDirectoryIterator($basePath, \RecursiveDirectoryIterator::SKIP_DOTS),
                 \RecursiveIteratorIterator::SELF_FIRST
             );
-            
+
             $fileCount = 0;
             foreach ($iterator as $path => $dir) {
                 $relativePath = str_replace($basePath . DIRECTORY_SEPARATOR, '', $path);
                 // Standard exclusions
-                if (str_contains($relativePath, 'vendor') || 
-                    str_contains($relativePath, 'node_modules') || 
-                    str_contains($relativePath, '.git') || 
+                if (str_contains($relativePath, 'vendor') ||
+                    str_contains($relativePath, 'node_modules') ||
+                    str_contains($relativePath, '.git') ||
                     str_contains($relativePath, 'storage') ||
                     str_contains($relativePath, 'dist') ||
                     str_contains($relativePath, 'bootstrap')) {
                     continue;
                 }
-                
+
                 if ($dir->isFile()) {
                     $files[] = $relativePath;
                     $fileCount++;
@@ -256,9 +266,9 @@ class AiCoachController extends Controller
         } catch (\Exception $e) {
             \Illuminate\Support\Facades\Log::warning("Failed to scan project structure: " . $e->getMessage());
         }
-        
+
         $context .= implode("\n", $files) . "\n\n";
-        
+
         // Find matching file
         $matchedFile = null;
         foreach ($files as $file) {
@@ -268,7 +278,7 @@ class AiCoachController extends Controller
                 break;
             }
         }
-        
+
         if ($matchedFile) {
             $fullPath = $basePath . DIRECTORY_SEPARATOR . $matchedFile;
             if (file_exists($fullPath) && is_file($fullPath) && filesize($fullPath) < 50000) {
@@ -284,7 +294,7 @@ class AiCoachController extends Controller
                             "```\n" . substr($docContent, 0, 3000) . "\n```\n\n";
             }
         }
-        
+
         return $context;
     }
 
@@ -354,7 +364,7 @@ class AiCoachController extends Controller
         try {
             foreach ($chunks as $chunk) {
                 if (empty($chunk)) continue;
-                
+
                 $url = "https://translate.google.com/translate_tts?ie=UTF-8&tl=" . $lang . "&client=tw-ob&q=" . urlencode($chunk);
 
                 $response = \Illuminate\Support\Facades\Http::withoutVerifying()

@@ -12,8 +12,12 @@ class WellnessAssessmentController extends Controller
         if (empty($nickname)) {
             return response()->json([]);
         }
+        $user = \App\Models\User::where('nickname', $nickname)->first();
+        if (!$user) {
+            return response()->json([]);
+        }
         // Return only the current user's assessments in chronological order to plot trends in the dashboard
-        $assessments = \App\Models\WellnessAssessment::where('nickname', $nickname)
+        $assessments = \App\Models\WellnessAssessment::where('user_id', $user->id)
             ->orderBy('created_at', 'asc')
             ->get();
         return response()->json($assessments);
@@ -122,8 +126,10 @@ class WellnessAssessmentController extends Controller
             $suggestions .= $header . implode($isAm ? "\n- " : "\n- ", $suggestionItems);
         }
 
+        $user = \App\Models\User::firstOrCreate(['nickname' => $request->nickname]);
+
         $assessment = \App\Models\WellnessAssessment::create([
-            'nickname' => $request->nickname,
+            'user_id' => $user->id,
             'stress_level' => $request->stress_level,
             'sleep_hours' => $request->sleep_hours,
             'water_intake' => $request->water_intake,
@@ -223,14 +229,17 @@ class WellnessAssessmentController extends Controller
             }
         }
 
-        // De-duplicate matched list by ID
-        $matched = $matched->unique('id')->values();
+        // De-duplicate matched list by wellness_category to ensure unique categories
+        $matched = $matched->unique('wellness_category')->values();
 
         // Enforce Limits (Min 2, Max 4)
         if ($matched->count() > 4) {
             $matched = $matched->take(4);
         } elseif ($matched->count() < 2) {
-            $fillers = \App\Models\ResortRecommendation::whereNotIn('id', $matched->pluck('id'))->get();
+            $matchedCategories = $matched->pluck('wellness_category')->toArray();
+            $fillers = \App\Models\ResortRecommendation::whereNotIn('wellness_category', $matchedCategories)
+                ->get()
+                ->unique('wellness_category');
             $needed = 2 - $matched->count();
             $matched = $matched->merge($fillers->take($needed));
         }
@@ -246,8 +255,10 @@ class WellnessAssessmentController extends Controller
             return $actArray;
         });
 
-        $assessment->recommended_resorts = $recommendations;
+        $assessmentArray = $assessment->toArray();
+        $assessmentArray['nickname'] = $user->nickname;
+        $assessmentArray['recommended_resorts'] = $recommendations;
 
-        return response()->json($assessment, 217); // 217 created status
+        return response()->json($assessmentArray, 217); // 217 created status
     }
 }

@@ -210,16 +210,6 @@ const confirmBooking = () => {
           <p class="text-sm sm:text-base text-zinc-800 dark:text-zinc-200 leading-relaxed font-semibold">
             {{ currentLang === 'am' ? wellnessInsight.description_am : wellnessInsight.description }}
           </p>
-          
-          <!-- Recommended Action callout -->
-          <div class="p-4 rounded-2xl bg-white/60 dark:bg-zinc-950/40 border border-zinc-200/10">
-            <span class="text-[10px] uppercase font-black tracking-wider text-emerald-600 dark:text-emerald-400 block mb-1">
-              💡 {{ t.resorts.recommendedAction }}
-            </span>
-            <p class="text-xs sm:text-sm text-zinc-600 dark:text-zinc-300 font-bold leading-normal">
-              {{ currentLang === 'am' ? wellnessInsight.recommended_action_am : wellnessInsight.recommended_action }}
-            </p>
-          </div>
         </div>
       </div>
 

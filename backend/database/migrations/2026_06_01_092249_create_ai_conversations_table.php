@@ -13,6 +13,7 @@ return new class extends Migration
     {
         Schema::create('ai_conversations', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
             $table->text('question');
             $table->text('response');
             $table->timestamps();

@@ -19,6 +19,7 @@ class WellnessChallengeController extends Controller
         ]);
 
         $nickname = trim($request->nickname);
+        $user = \App\Models\User::firstOrCreate(['nickname' => $nickname]);
         $challenge = \App\Models\WellnessChallenge::findOrFail($id);
         $category = $challenge->category;
 
@@ -26,11 +27,11 @@ class WellnessChallengeController extends Controller
         $todayStart = \Carbon\Carbon::today();
         $todayEnd = \Carbon\Carbon::today()->endOfDay();
 
-        $alreadyCompleted = \App\Models\ChallengeCompletion::where('nickname', $nickname)
+        $alreadyCompleted = \App\Models\ChallengeCompletion::where('user_id', $user->id)
             ->whereHas('challenge', function ($query) use ($category) {
                 $query->where('category', $category);
             })
-            ->whereBetween('completed_at', [$todayStart, $todayEnd])
+            ->whereBetween('completion_date', [$todayStart, $todayEnd])
             ->exists();
 
         if ($alreadyCompleted) {
@@ -42,12 +43,19 @@ class WellnessChallengeController extends Controller
 
         // Complete the challenge
         $completion = \App\Models\ChallengeCompletion::create([
-            'nickname' => $nickname,
+            'user_id' => $user->id,
             'challenge_id' => $challenge->id,
-            'reflection_text' => $request->reflection_text,
             'points_awarded' => $challenge->reward_points,
-            'completed_at' => \Carbon\Carbon::now(),
+            'completion_date' => \Carbon\Carbon::now(),
         ]);
+
+        if (!empty($request->reflection_text)) {
+            \App\Models\ChallengeReflection::create([
+                'user_id' => $user->id,
+                'challenge_completion_id' => $completion->id,
+                'reflection' => $request->reflection_text,
+            ]);
+        }
 
         return response()->json([
             'success' => true,
@@ -60,10 +68,22 @@ class WellnessChallengeController extends Controller
     public function stats(Request $request)
     {
         $nickname = trim($request->query('nickname', 'Guest'));
+        $user = \App\Models\User::where('nickname', $nickname)->first();
 
-        $completions = \App\Models\ChallengeCompletion::where('nickname', $nickname)
+        if (!$user) {
+            return response()->json([
+                'nickname' => $nickname,
+                'total_completed' => 0,
+                'wellness_points' => 0,
+                'streak' => 0,
+                'completed_categories_today' => [],
+                'recent_reflections' => [],
+            ]);
+        }
+
+        $completions = \App\Models\ChallengeCompletion::where('user_id', $user->id)
             ->with('challenge')
-            ->orderBy('completed_at', 'desc')
+            ->orderBy('completion_date', 'desc')
             ->get();
 
         $totalCompleted = $completions->count();
@@ -73,7 +93,7 @@ class WellnessChallengeController extends Controller
         $streak = 0;
         if ($totalCompleted > 0) {
             $dates = $completions->map(function ($c) {
-                return \Carbon\Carbon::parse($c->completed_at)->startOfDay();
+                return \Carbon\Carbon::parse($c->completion_date)->startOfDay();
             })->unique()->values();
 
             $today = \Carbon\Carbon::today();
@@ -96,8 +116,8 @@ class WellnessChallengeController extends Controller
         $todayStart = \Carbon\Carbon::today();
         $todayEnd = \Carbon\Carbon::today()->endOfDay();
 
-        $completedCategoriesToday = \App\Models\ChallengeCompletion::where('nickname', $nickname)
-            ->whereBetween('completed_at', [$todayStart, $todayEnd])
+        $completedCategoriesToday = \App\Models\ChallengeCompletion::where('user_id', $user->id)
+            ->whereBetween('completion_date', [$todayStart, $todayEnd])
             ->get()
             ->map(function ($c) {
                 return $c->challenge->category;
@@ -107,17 +127,22 @@ class WellnessChallengeController extends Controller
             ->toArray();
 
         // Recent reflections
-        $recentReflections = $completions->filter(function ($c) {
-            return !empty($c->reflection_text);
-        })->take(10)->map(function ($c) {
-            return [
-                'challenge_name' => $c->challenge->challenge_name,
-                'challenge_name_am' => $c->challenge->challenge_name_am,
-                'reflection_text' => $c->reflection_text,
-                'completed_at' => $c->completed_at->toIso8601String(),
-                'category' => $c->challenge->category,
-            ];
-        })->values()->toArray();
+        $recentReflections = \App\Models\ChallengeReflection::where('user_id', $user->id)
+            ->with('challengeCompletion.challenge')
+            ->orderBy('created_at', 'desc')
+            ->take(10)
+            ->get()
+            ->map(function ($r) {
+                return [
+                    'challenge_name' => $r->challengeCompletion->challenge->challenge_name ?? '',
+                    'challenge_name_am' => $r->challengeCompletion->challenge->challenge_name_am ?? '',
+                    'reflection_text' => $r->reflection,
+                    'completed_at' => $r->created_at->toIso8601String(),
+                    'category' => $r->challengeCompletion->challenge->category ?? '',
+                ];
+            })
+            ->values()
+            ->toArray();
 
         return response()->json([
             'nickname' => $nickname,

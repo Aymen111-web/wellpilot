@@ -5,8 +5,14 @@ import Dashboard from '../pages/Dashboard.vue';
 import AiCoach from '../pages/AiCoach.vue';
 import Resorts from '../pages/Resorts.vue';
 import Challenges from '../pages/Challenges.vue';
+import Login from '../pages/Login.vue';
 
 const routes = [
+  {
+    path: '/login',
+    name: 'Login',
+    component: Login
+  },
   {
     path: '/',
     name: 'Home',
@@ -48,6 +54,17 @@ const router = createRouter({
   routes,
   scrollBehavior() {
     return { top: 0 };
+  }
+});
+
+router.beforeEach((to, from, next) => {
+  const nickname = localStorage.getItem('wellpilot_nickname');
+  if (!nickname && to.path !== '/login') {
+    next('/login');
+  } else if (nickname && to.path === '/login') {
+    next('/dashboard');
+  } else {
+    next();
   }
 });
 

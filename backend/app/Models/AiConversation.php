@@ -7,7 +7,13 @@ use Illuminate\Database\Eloquent\Model;
 class AiConversation extends Model
 {
     protected $fillable = [
+        'user_id',
         'question',
         'response'
     ];
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
 }
