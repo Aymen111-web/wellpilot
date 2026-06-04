@@ -78,43 +78,43 @@ class WellnessAssessmentController extends Controller
 
         // Condition: High Stress (stress score < 40)
         if ($stressScore < 40) {
-            $suggestionItems[] = $isAm 
+            $suggestionItems[] = $isAm
                 ? "ከፍተኛ ውጥረት/ጭንቀት ተገኝቷል (የውጥረት መጠን ከ40 በታች)። የነርቭ ሥርዓትዎን ለማረጋጋት እንደ ስፓ ቴራፒ (Spa therapy)፣ ማሰላሰል (Meditation)፣ ተፈጥሮአዊ የእግር ጉዞ (Nature walks) እና የመዝናኛ ክፍለ-ጊዜዎች (Relaxation sessions) ባሉ ዘና የሚያደርጉ የሪዞርት እንቅስቃሴዎች ላይ እንዲሳተፉ እንመክራለን።"
                 : "High Stress detected (Stress score < 40). We recommend participating in relaxing resort activities like Spa therapy, Meditation, Nature walks, and Relaxation sessions to help calm your nervous system.";
         }
 
         // Condition: Low Activity (activity level low)
         if ($activity === 'low') {
-            $suggestionItems[] = $isAm 
+            $suggestionItems[] = $isAm
                 ? "አነስተኛ የአካል እንቅስቃሴ ተገኝቷል። እንደ ዋና (Swimming)፣ የአካል ብቃት ፕሮግራሞች (Fitness programs) እና የዮጋ ክፍለ-ጊዜዎች (Yoga sessions) ያሉ የአካል እንቅስቃሴዎችን በቆይታዎ ውስጥ ለማካተት ይሞክሩ።"
                 : "Low Activity detected. Try incorporating movement into your stay, such as Swimming, Fitness programs, and Yoga sessions.";
         }
 
         // Condition: Poor Sleep (< 6 hrs)
         if ($sleep < 6) {
-            $suggestionItems[] = $isAm 
+            $suggestionItems[] = $isAm
                 ? "አነስተኛ የእንቅልፍ ጥራት ተገኝቷል (ከ6 ሰዓት በታች)። የእንቅልፍ ልምድዎን እና ጉልበትዎን ለመመለስ የእንቅልፍ ጤና ፕሮግራሞችን (Sleep wellness programs) እና የመዝናኛ ማገገሚያዎችን (Relaxation retreats) እንዲጎበኙ እንመክራለን።"
                 : "Poor Sleep Quality detected (under 6 hours). We recommend exploring Sleep wellness programs and Relaxation retreats to restore your sleep hygiene and energy.";
         }
 
         // Condition: Good Wellness (score >= 75)
         if ($wellnessScore >= 75) {
-            $suggestionItems[] = $isAm 
+            $suggestionItems[] = $isAm
                 ? "ጥሩ የጤና ውጤት (75+)! በጣም ጥሩ እየሰሩ ነው። ይህንን ሚዛን ይጠብቁ እና እንደ ጀብዱ እንቅስቃሴዎች (Adventure activities) እና ማህበራዊ የጤና ዝግጅቶች (Social wellness events) ባሉ ንቁ የሪዞርት ተሞክሮዎች ይደሰቱ።"
                 : "Good Wellness Score (75+)! You are doing great. Keep up the balance and enjoy active resort experiences like Adventure activities and Social wellness events.";
         }
 
         // Add overall zone feedback
         if ($wellnessScore >= 80) {
-            $zoneFeedback = $isAm 
+            $zoneFeedback = $isAm
                 ? "የበለጸገ ደረጃ (Thriving Zone)፦ ልዩ የሆነ ራስን የመንከባከብ ልምድ! ከፍተኛ ሚዛናዊ የሆኑ የጤና ልምዶች አሉዎት። ይህንን አስደናቂ ልማድ ይቀጥሉበት፣ እና እንደ ጥልቅ የአካል ማሸት (Deep Tissue Massage) ወይም የፀሐይ መጥለቂያ ካያኪንግ (Sunset Lagoon Kayaking) ባሉ የቅንጦት የሪዞርት ተሞክሮዎች እራስዎን ይሸልሙ።"
                 : "Thriving Zone: Exceptional self-care! You have highly balanced wellness habits. Keep up this incredible routine, and consider rewarding yourself with a luxurious resort experience like our Deep Tissue Massage or a Sunset Lagoon Kayaking adventure.";
         } elseif ($wellnessScore >= 60) {
-            $zoneFeedback = $isAm 
+            $zoneFeedback = $isAm
                 ? "የተመጣጠነ ደረጃ (Balancing Zone)፦ ጥሩ መሠረት! ጤናማ ሁኔታን እየጠበቁ ነው፣ ነገር ግን ደካማ ለሆኑ ክፍሎች ትኩረት መስጠት ደህንነትዎን በእጅጉ ያሻሽላል። ተጨማሪ የማረጋጋት ኃይልን ለማግኘት የማለዳ የባህር ዳርቻ ዮጋ (Sunrise Beach Yoga) ለመሞከር ይሞክሩ።"
                 : "Balancing Zone: Good foundation! You are maintaining a healthy baseline, but focused attention on weaker areas will significantly boost your well-being. Try adding a Sunrise Beach Yoga session to bring extra centering energy.";
         } else {
-            $zoneFeedback = $isAm 
+            $zoneFeedback = $isAm
                 ? "የማገገሚያ ደረጃ (Healing Zone)፦ ማገገም ያስፈልጋል። አእምሮዎ እና አካልዎ የማስጠንቀቂያ ምልክቶችን እየላኩ ነው። ይህ ጊዜ እረፍት ለመውሰድ እና እንደ የድምፅ መታጠቢያ (Acoustic Sound Bath) ወይም ጫካ ውስጥ ማሰላሰል (Forest Meditation) ባሉ ጥልቅ የሰውነት ማደሻ ተግባራት ላይ ለመሳተፍ ትክክለኛው ጊዜ ነው።"
                 : "Healing Zone: Recovery needed. Your mind and body are sending warning signs. This is the perfect time to step back, rest, and engage in deeply restorative activities like our Acoustic Sound Bath or guided Forest Meditation.";
         }
