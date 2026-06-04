@@ -115,6 +115,30 @@ const formatDate = (dateString) => {
     return `${date.getMonth() + 1}/${date.getDate()} - ${date.getHours()}:${String(date.getMinutes()).padStart(2, '0')}`;
   }
 };
+
+const translateMood = (mood) => {
+  if (!mood) return '';
+  const mapping = {
+    'sad': 'moodSad',
+    'stressed': 'moodStressed',
+    'neutral': 'moodNeutral',
+    'happy': 'moodHappy',
+    'excited': 'moodExcited'
+  };
+  const key = mapping[mood.toLowerCase()];
+  return key && t.value.assessment ? t.value.assessment[key] : mood;
+};
+
+const translateActivity = (level) => {
+  if (!level) return '';
+  const mapping = {
+    'low': 'activityLow',
+    'medium': 'activityMedium',
+    'high': 'activityHigh'
+  };
+  const key = mapping[level.toLowerCase()];
+  return key && t.value.dashboard ? t.value.dashboard[key] : level;
+};
 </script>
 
 <template>
@@ -225,7 +249,7 @@ const formatDate = (dateString) => {
             <span class="text-2xl">
               {{ latest?.mood_level === 'sad' ? '😢' : (latest?.mood_level === 'stressed' ? '😰' : (latest?.mood_level === 'neutral' ? '😐' : (latest?.mood_level === 'happy' ? '😊' : '🤩'))) }}
             </span>
-            <span class="text-xs font-bold text-violet-500 capitalize">{{ latest?.mood_level }}</span>
+            <span class="text-xs font-bold text-violet-500 capitalize">{{ translateMood(latest?.mood_level) }}</span>
           </div>
         </div>
 
@@ -426,8 +450,8 @@ const formatDate = (dateString) => {
                 <td class="py-3 px-4 text-center">{{ item.stress_level }}/10</td>
                 <td class="py-3 px-4 text-center">{{ item.sleep_hours }} hrs</td>
                 <td class="py-3 px-4 text-center">{{ item.water_intake }} L</td>
-                <td class="py-3 px-4 text-center capitalize">{{ item.activity_level }}</td>
-                <td class="py-3 px-4 text-center capitalize">{{ item.mood_level }}</td>
+                <td class="py-3 px-4 text-center capitalize">{{ translateActivity(item.activity_level) }}</td>
+                <td class="py-3 px-4 text-center capitalize">{{ translateMood(item.mood_level) }}</td>
               </tr>
             </tbody>
           </table>

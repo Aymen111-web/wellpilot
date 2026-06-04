@@ -36,7 +36,7 @@ const handleLogin = async () => {
       router.push('/dashboard');
     } else {
       // New user: redirect to assessment
-      router.push('/assessment');
+      router.push('/');
     }
   } catch (err) {
     console.error('Login error:', err);

@@ -1,10 +1,11 @@
 <script setup>
 import { ref, onMounted, watch } from 'vue';
-import { RouterLink, RouterView, useRouter } from 'vue-router';
+import { RouterLink, RouterView, useRouter, useRoute } from 'vue-router';
 import { useLanguage } from './services/translations';
 
 const { currentLang, toggleLanguage, t } = useLanguage();
 const router = useRouter();
+const route = useRoute();
 
 // Dark mode state
 const isDark = ref(localStorage.getItem('wellpilot_theme') !== 'light');
@@ -41,14 +42,14 @@ onMounted(() => {
 });
 
 // Close mobile menu on route change & update nickname
-watch(() => router.currentRoute.value.path, () => {
+watch(() => route.path, () => {
   isMobileMenuOpen.value = false;
   activeNickname.value = localStorage.getItem('wellpilot_nickname');
 });
 </script>
 
 <template>
-  <div class="min-h-screen bg-slate-50 dark:bg-zinc-950 text-zinc-700 dark:text-zinc-300 transition-colors duration-300 font-sans">
+  <div class="min-h-screen flex flex-col bg-slate-50 dark:bg-zinc-950 text-zinc-700 dark:text-zinc-300 transition-colors duration-300 font-sans">
     
     <!-- Top Glassmorphic Navbar -->
     <header class="sticky top-0 z-50 w-full backdrop-blur-md bg-white/70 dark:bg-zinc-950/70 border-b border-zinc-200/50 dark:border-zinc-800/50 px-4 sm:px-6 lg:px-8 py-4 transition-all duration-300">
@@ -63,7 +64,7 @@ watch(() => router.currentRoute.value.path, () => {
         </RouterLink>
 
         <!-- Desktop Navigation Items -->
-        <nav class="hidden md:flex space-x-1 lg:space-x-2 items-center bg-zinc-100/50 dark:bg-zinc-900/50 p-1 rounded-full border border-zinc-200/30 dark:border-zinc-800/30">
+        <nav v-if="route.path !== '/login'" class="hidden md:flex space-x-1 lg:space-x-2 items-center bg-zinc-100/50 dark:bg-zinc-900/50 p-1 rounded-full border border-zinc-200/30 dark:border-zinc-800/30">
           <RouterLink to="/" class="px-4 py-2 rounded-full text-sm font-medium transition-all duration-300" active-class="bg-emerald-500 text-white shadow-md shadow-emerald-500/20">
             {{ t.nav.home }}
           </RouterLink>
@@ -138,7 +139,7 @@ watch(() => router.currentRoute.value.path, () => {
           </button>
 
           <!-- Hamburger Button -->
-          <button @click="isMobileMenuOpen = !isMobileMenuOpen" class="p-2 rounded-md border border-zinc-200 dark:border-zinc-800 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-900 focus:outline-none transition-all duration-300">
+          <button v-if="route.path !== '/login'" @click="isMobileMenuOpen = !isMobileMenuOpen" class="p-2 rounded-md border border-zinc-200 dark:border-zinc-800 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-900 focus:outline-none transition-all duration-300">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path v-if="isMobileMenuOpen" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
               <path v-else stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
@@ -158,7 +159,7 @@ watch(() => router.currentRoute.value.path, () => {
       leave-from-class="transform translate-y-0 opacity-100"
       leave-to-class="transform -translate-y-4 opacity-0"
     >
-      <div v-if="isMobileMenuOpen" class="md:hidden sticky top-[73px] z-40 w-full bg-white dark:bg-zinc-900 border-b border-zinc-200/50 dark:border-zinc-800/50 px-4 py-4 space-y-2 shadow-xl">
+      <div v-if="isMobileMenuOpen && route.path !== '/login'" class="md:hidden sticky top-[73px] z-40 w-full bg-white dark:bg-zinc-900 border-b border-zinc-200/50 dark:border-zinc-800/50 px-4 py-4 space-y-2 shadow-xl">
         <!-- User Profile Display & Switcher for Mobile (only if logged in) -->
         <div v-if="activeNickname" class="flex items-center justify-between px-4 py-2.5 bg-emerald-500/10 border border-emerald-500/20 rounded-xl text-xs font-semibold text-emerald-600 dark:text-emerald-400 mb-2">
           <div class="flex items-center space-x-1.5">
@@ -203,16 +204,12 @@ watch(() => router.currentRoute.value.path, () => {
       </RouterView>
     </main>
 
-    <!-- Glassmorphic Footer -->
-    <footer class="mt-auto w-full border-t border-zinc-200/50 dark:border-zinc-800/50 bg-white/40 dark:bg-zinc-950/40 backdrop-blur-sm py-8 px-4 sm:px-6 lg:px-8">
-      <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between text-sm text-zinc-500 dark:text-zinc-400 space-y-4 md:space-y-0">
+    <!-- Static Footer -->
+    <footer class="mt-auto w-full border-t border-zinc-200/50 dark:border-zinc-800/50 bg-white dark:bg-zinc-900 py-6 px-4 sm:px-6 lg:px-8">
+      <div class="max-w-7xl mx-auto flex items-center justify-center text-sm text-zinc-500 dark:text-zinc-400">
         <div class="flex items-center space-x-2">
           <span class="font-bold text-zinc-800 dark:text-zinc-200">WellPilot</span>
           <span>© 2026. All rights reserved.</span>
-        </div>
-        <div class="flex space-x-6">
-          <span>Heal. Build. Thrive.</span>
-          <span class="text-emerald-500 font-semibold">Wellness Hackathon 2026</span>
         </div>
       </div>
     </footer>
