@@ -72,7 +72,8 @@ export const translations = {
       recommendationsHeader: 'Actionable Insights',
       retakeBtn: 'Take Assessment Again',
       dashboardBtn: 'Go to Dashboard',
-      validationErr: 'Please fill in all the required fields correctly.'
+      validationErr: 'Please fill in all the required fields correctly.',
+      invalidName: 'Invalid name.'
     },
     dashboard: {
       title: 'Wellness Analytics & Trends',
@@ -222,7 +223,8 @@ export const translations = {
       recommendationsHeader: 'ሊተገበሩ የሚችሉ ምክሮች',
       retakeBtn: 'እንደገና ግምገማ ውሰድ',
       dashboardBtn: 'ወደ ክትትል ገጽ ሂድ',
-      validationErr: 'እባክዎን ሁሉንም አስፈላጊ ቦታዎች በትክክል ይሙሉ::'
+      validationErr: 'እባክዎን ሁሉንም አስፈላጊ ቦታዎች በትክክል ይሙሉ::',
+      invalidName: 'ልክ ያልሆነ ስም::'
     },
     dashboard: {
       title: 'የጤና ክትትልና አዝማሚያዎች',

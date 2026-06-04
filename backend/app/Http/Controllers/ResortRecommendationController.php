@@ -72,6 +72,28 @@ class ResortRecommendationController extends Controller
         // Personalized matching logic
         $matched = collect();
         $reasons = [];
+        $fallbackReasons = [
+            'Stress' => [
+                'why' => "Recommended to help release mental tension and lower daily cortisol levels.",
+                'why_am' => "የአእምሮ ውጥረትን ለመቀነስ እና የእለት ተእለት ጭንቀትን ለማቃለል ተመርጧል።"
+            ],
+            'Sleep' => [
+                'why' => "Recommended to encourage deep muscle relaxation and prepare your body for restorative sleep.",
+                'why_am' => "ጥልቅ የጡንቻ መዝናናትን ለማበረታታት እና ሰውነትዎን ለተሟላ እንቅልፍ ለማዘጋጀት ተመርጧል።"
+            ],
+            'Physical Activity' => [
+                'why' => "Recommended to build core strength and increase overall cardiovascular vitality.",
+                'why_am' => "የሰውነትዎን ጥንካሬ ለመገንባት እና የልብና የደም ዝውውርን ለማነቃቃት ተመርጧል።"
+            ],
+            'Hydration' => [
+                'why' => "Recommended to support natural detoxification and improve cellular recovery.",
+                'why_am' => "የሰውነት መርዛማ ንጥረ ነገሮችን ለማስወገድ እና የሴሎች ማገገምን ለመደገፍ ተመርጧል።"
+            ],
+            'Mood' => [
+                'why' => "Recommended to stimulate endorphin release and lift your emotional outlook.",
+                'why_am' => "የደስታ ሆርሞኖችን ለማነቃቃት እና ስሜታዊ ደህንነትዎን ከፍ ለማድረግ ተመርጧል።"
+            ]
+        ];
 
         // Check Stress deficit
         if ($assessment->stress_level >= 6) {
@@ -139,10 +161,17 @@ class ResortRecommendationController extends Controller
             $matched = $matched->merge($activeMood);
             foreach ($activeMood as $act) {
                 if (!isset($reasons[$act->id])) {
-                    $reasons[$act->id] = [
-                        'why' => "Recommended because of your excellent wellness profile ({$score}/100) to keep you active, social, and thriving.",
-                        'why_am' => "ምርጥ የጤና ውጤት ({$score}/100) ስላስመዘገቡ፣ ንቁ እና ማህበራዊ ሆነው እንዲቀጥሉ ተመርጧል።"
-                    ];
+                    if ($act->wellness_category === 'Physical Activity') {
+                        $reasons[$act->id] = [
+                            'why' => "Recommended because of your excellent wellness profile ({$score}/100) to optimize your strength, flexibility, and physical endurance.",
+                            'why_am' => "ምርጥ የጤና ውጤት ({$score}/100) ስላስመዘገቡ፣ ጥንካሬዎን፣ ተለዋዋጭነትዎን እና የአካል ብቃትዎን ለማጎልበት ተመርጧል።"
+                        ];
+                    } else {
+                        $reasons[$act->id] = [
+                            'why' => "Recommended because of your excellent wellness profile ({$score}/100) to keep you vibrant, mindful, and thriving.",
+                            'why_am' => "ምርጥ የጤና ውጤት ({$score}/100) ስላስመዘገቡ፣ ሁልጊዜ ደስተኛ፣ ንቁ እና ብሩህ አእምሮ እንዲኖርዎት ተመርጧል።"
+                        ];
+                    }
                 }
             }
         }
@@ -152,10 +181,12 @@ class ResortRecommendationController extends Controller
             $balanced = ResortRecommendation::whereIn('wellness_category', ['Stress', 'Mood', 'Sleep'])->get();
             $matched = $matched->merge($balanced);
             foreach ($balanced as $act) {
-                $reasons[$act->id] = [
-                    'why' => "Recommended to support your overall wellness balance and maintain healthy body-mind alignment.",
-                    'why_am' => "አጠቃላይ የአካልና አእምሮ ጤናዎን ለማገዝና ጤናማ ሚዛንን ለመጠበቅ ተመርጧል።"
-                ];
+                if (!isset($reasons[$act->id])) {
+                    $reasons[$act->id] = $fallbackReasons[$act->wellness_category] ?? [
+                        'why' => "Recommended to support your overall wellness balance and maintain healthy body-mind alignment.",
+                        'why_am' => "አጠቃላይ የአካልና አእምሮ ጤናዎን ለማገዝና ጤናማ ሚዛንን ለመጠበቅ ተመርጧል።"
+                    ];
+                }
             }
         }
 
@@ -171,7 +202,16 @@ class ResortRecommendationController extends Controller
                 ->get()
                 ->unique('wellness_category');
             $needed = 2 - $matched->count();
-            $matched = $matched->merge($fillers->take($needed));
+            $selectedFillers = $fillers->take($needed);
+            foreach ($selectedFillers as $act) {
+                if (!isset($reasons[$act->id])) {
+                    $reasons[$act->id] = $fallbackReasons[$act->wellness_category] ?? [
+                        'why' => "Recommended to support your overall wellness balance.",
+                        'why_am' => "አጠቃላይ የአካልና አእምሮ ጤናዎን ለማገዝ ተመርጧል።"
+                    ];
+                }
+            }
+            $matched = $matched->merge($selectedFillers);
         }
 
         // Map recommendations with explanations

@@ -6,7 +6,7 @@ import api from '../services/api';
 const { currentLang, t } = useLanguage();
 
 // Form input models
-const nickname = ref('');
+const nickname = ref(localStorage.getItem('wellpilot_nickname') || '');
 const stressLevel = ref(5);
 const sleepHours = ref(7);
 const waterIntake = ref(2);
@@ -76,6 +76,12 @@ const resetForm = () => {
 
 const submitAssessment = async () => {
   // Input validations
+  const activeNickname = localStorage.getItem('wellpilot_nickname') || '';
+  if (activeNickname && nickname.value.trim().toLowerCase() !== activeNickname.trim().toLowerCase()) {
+    errorMsg.value = t.value.assessment.invalidName;
+    return;
+  }
+
   if (!nickname.value.trim() || sleepHours.value < 0 || sleepHours.value > 24 || waterIntake.value < 0 || waterIntake.value > 20) {
     errorMsg.value = currentLang.value === 'en' 
       ? 'Please fill in all the required fields correctly.' 
