@@ -6,12 +6,22 @@ const getBackendUrl = () => {
     if (stored && (stored.startsWith('http://') || stored.startsWith('https://'))) {
       return stored;
     }
+
+    // Check Vite environment variable if configured
+    if (import.meta.env && import.meta.env.VITE_BACKEND_URL) {
+      return import.meta.env.VITE_BACKEND_URL;
+    }
+
     // Dynamic fallback to port 8000 on the same host
     const protocol = window.location.protocol;
     const hostname = window.location.hostname || '127.0.0.1';
     return `${protocol}//${hostname}:8000`;
   }
-  return 'http://127.0.0.1:8000';
+
+  if (import.meta.env && import.meta.env.VITE_BACKEND_URL) {
+    return import.meta.env.VITE_BACKEND_URL;
+  }
+  return 'https://bytetroopers.com:8000';
 };
 
 const backendUrl = getBackendUrl();
