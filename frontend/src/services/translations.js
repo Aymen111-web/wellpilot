@@ -167,7 +167,7 @@ export const translations = {
     login: {
       title: 'Welcome to WellPilot',
       subtitle: 'Please enter your unique nickname to access your wellness dashboard or get started on your journey.',
-      nicknameLabel: 'Enter Nickname',
+      nicknameLabel: 'Register your nickname',
       nicknamePlh: 'e.g. Selam, Alex...',
       enterBtn: 'Access Dashboard',
       loading: 'Verifying identity...',
@@ -318,7 +318,7 @@ export const translations = {
     login: {
       title: 'ወደ ዌልፓይለት እንኳን ደህና መጡ',
       subtitle: 'እባክዎን የጤና መከታተያ ገጽዎን ለማግኘት ወይም አዲስ ጉዞ ለመጀመር ቅጽል ስምዎን ያስገቡ።',
-      nicknameLabel: 'ቅጽል ስም ያስገቡ',
+      nicknameLabel: 'ቅጽል ስምዎን ይመዝግቡ',
       nicknamePlh: 'ምሳሌ፦ ሰላም፣ አሌክስ...',
       enterBtn: 'ወደ መከታተያ ገጽ ይግቡ',
       loading: 'ማንነትዎን በማረጋገጥ ላይ...',
