@@ -57,7 +57,9 @@ class AiCoachController extends Controller
         }
 
         $apiKey = config('services.gemini.key') ?? env('GEMINI_API_KEY');
+        $modelName = config('services.gemini.model', 'gemini-2.5-flash');
         $aiResponse = "";
+        $apiError = "";
 
         if ($apiKey) {
             try {
@@ -103,7 +105,7 @@ class AiCoachController extends Controller
                 $response = \Illuminate\Support\Facades\Http::withoutVerifying()
                     ->withHeaders([
                         'Content-Type' => 'application/json',
-                    ])->post("https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={$apiKey}", [
+                    ])->post("https://generativelanguage.googleapis.com/v1beta/models/{$modelName}:generateContent?key={$apiKey}", [
                         'contents' => [
                             [
                                 'role' => 'user',
@@ -123,9 +125,11 @@ class AiCoachController extends Controller
                     $data = $response->json();
                     $aiResponse = $data['candidates'][0]['content']['parts'][0]['text'] ?? "";
                 } else {
+                    $apiError = "Gemini API returned error code " . $response->status();
                     \Illuminate\Support\Facades\Log::warning("Gemini API returned error: " . $response->body());
                 }
             } catch (\Exception $e) {
+                $apiError = "Gemini API connection error: " . $e->getMessage();
                 \Illuminate\Support\Facades\Log::error("Gemini API connection error: " . $e->getMessage());
             }
         }
@@ -136,7 +140,15 @@ class AiCoachController extends Controller
             $isAm = ($request->lang === 'am');
 
             if ($isAm) {
-                if (str_contains($q, 'ጭንቀት') || str_contains($q, 'ድካም') || str_contains($q, 'ሰለቸኝ') || str_contains($q, 'ውጥረት') || str_contains($q, 'ፍርሃት') || str_contains($q, 'ደከመኝ')) {
+                if (str_contains($q, 'ሰላም') || str_contains($q, 'ሃሎ') || str_contains($q, 'ሄይ')) {
+                    $aiResponse = "ሰላም! እንዴት ልረዳዎት እችላለሁ?";
+                } elseif (str_contains($q, 'ማን ነህ') || str_contains($q, 'ማን ነሽ') || str_contains($q, 'ምን ነህ') || str_contains($q, 'ምን ነሽ') || str_contains($q, 'ስም')) {
+                    $aiResponse = "እኔ የ WellPilot ኤአይ የጤና አማካሪ ነኝ። ስለ ጭንቀት ቅነሳ፣ እንቅልፍ፣ የውሃ አወሳሰድ እና የአካል ብቃት እንቅስቃሴ ልረዳዎት እችላለሁ።";
+                } elseif (str_contains($q, 'ደህና ነህ') || str_contains($q, 'እንዴት ነህ') || str_contains($q, 'ደህና ነሽ') || str_contains($q, 'እንዴት ነሽ') || str_contains($q, 'ደህና ናችሁ') || str_contains($q, 'እንዴት ነው')) {
+                    $aiResponse = "እግዚአብሔር ይመስገን፣ እኔ በጣም ደህና ነኝ! የእርስዎ ቀን እንዴት እየሄደ ነው?";
+                } elseif (str_contains($q, 'ሀሳብ') || str_contains($q, 'አስባለሁ') || str_contains($q, 'አእምሮዬ')) {
+                    $aiResponse = "ምን እያሰቡ ነው? እኔ ለማዳመጥ እና ለመርዳት እዚህ ነኝ።";
+                } elseif (str_contains($q, 'ጭንቀት') || str_contains($q, 'ድካም') || str_contains($q, 'ሰለቸኝ') || str_contains($q, 'ውጥረት') || str_contains($q, 'ፍርሃት') || str_contains($q, 'ደከመኝ')) {
                     if ($latestAssessment) {
                         $stressStr = ($latestAssessment->stress_level >= 7 ? 'ከፍተኛ' : ($latestAssessment->stress_level <= 3 ? 'አነስተኛ' : 'መካከለኛ'));
                         $aiResponse = "በቅርብ ግምገማዎ መሠረት፣ የጭንቀትዎ መጠን {$stressStr} በመሆኑ ድካም እንዲሰማዎት አስተዋጽኦ አድርጎ ሊሆን ይችላል። እባክዎን ትንሽ እረፍት ያድርጉ፣ ስልክዎን ዘግተው ለ15 ደቂቃ በቀስታ ይራመዱ ወይም ዛሬ ማታ ሞቅ ባለ ውሃ ይታጠቡ።";
@@ -164,12 +176,16 @@ class AiCoachController extends Controller
                 } else {
                     $aiResponse = "ስለ ጭንቀት ቅነሳ፣ ጥልቅ እንቅልፍ፣ የአካል ብቃት እንቅስቃሴ እና አመጋገብ ልረዳዎ እችላለሁ። ዛሬ ምን ዓይነት የጤና ክፍል ማሻሻል እንደሚፈልጉ ይንገሩኝ።";
                 }
-
-                if (empty($apiKey)) {
-                    $aiResponse .= "\n\n*(ማሳሰቢያ፡ የኤአይ አማካሪው በአሁኑ ጊዜ ከመስመር ውጭ በጤና ባለሙያ ሁነታ ላይ እየሰራ ነው። ተለዋዋጭ እና ግላዊ የሆኑ የGemini AI ምላሾችን ለማንቃት የ`GEMINI_API_KEY`ን በጀርባ `.env` ፋይልዎ ውስጥ ያክሉ!)*";
-                }
             } else {
-                if (str_contains($q, 'stress') || str_contains($q, 'anxious') || str_contains($q, 'burnout') || str_contains($q, 'tired') || str_contains($q, 'exhausted') || str_contains($q, 'pressure') || str_contains($q, 'overwhelm')) {
+                if (preg_match('/\b(hi|hello|hey|greetings|howdy|yo)\b/i', $q)) {
+                    $aiResponse = "Hi! How can I help you?";
+                } elseif (preg_match('/\b(who are you|your name|what is your name)\b/i', $q)) {
+                    $aiResponse = "I am the WellPilot AI Coach, your empathetic digital wellness assistant. I can guide you on stress reduction, sleep quality, hydration, and exercise.";
+                } elseif (preg_match('/\b(are (you|u) fine|how are (you|u)|are (you|u) ok|how is it going|how are (you|u) doing)\b/i', $q)) {
+                    $aiResponse = "I am doing great, thank you! How are you doing today?";
+                } elseif (str_contains($q, 'on my mind') || str_contains($q, 'something on my mind') || str_contains($q, 'thinking about')) {
+                    $aiResponse = "What's on your mind? I'm here to listen and help.";
+                } elseif (str_contains($q, 'stress') || str_contains($q, 'anxious') || str_contains($q, 'burnout') || str_contains($q, 'tired') || str_contains($q, 'exhausted') || str_contains($q, 'pressure') || str_contains($q, 'overwhelm')) {
                     if ($latestAssessment) {
                         $stressStr = ($latestAssessment->stress_level >= 7 ? 'High' : ($latestAssessment->stress_level <= 3 ? 'Low' : 'Medium'));
                         $aiResponse = "Based on your recent assessment, your stress level is {$stressStr}. Try box breathing (inhale, hold, exhale, hold for 4 seconds each), take a 15-minute screen-free walk in nature, or schedule 30 minutes tonight for a hot mineral bath to calm your nervous system.";
@@ -197,10 +213,6 @@ class AiCoachController extends Controller
                 } else {
                     $aiResponse = "I can help you with stress reduction, deep sleep rituals, mindful movement, and cellular hydration. Let me know what specific area you would like to explore or improve today.";
                 }
-
-                if (empty($apiKey)) {
-                    $aiResponse .= "\n\n*(Note: AI Coach is currently running in offline wellness expert mode. Add a `GEMINI_API_KEY` to your backend `.env` file to enable dynamic, personalized Gemini AI responses!)*";
-                }
             }
         }
 
@@ -214,6 +226,8 @@ class AiCoachController extends Controller
         return response()->json([
             'question' => $question,
             'response' => $aiResponse,
+            'offline' => empty($apiKey) || !empty($apiError),
+            'api_error' => $apiError,
         ]);
     }
 

@@ -152,6 +152,10 @@ const sendChatMessage = async () => {
       nickname: storedNickname.value
     });
 
+    if (response.data.offline !== undefined) {
+      isConfigured.value = !response.data.offline;
+    }
+
     // Add AI Message
     messages.value.push({
       sender: 'ai',
@@ -312,6 +316,10 @@ const initContinuousRecognition = () => {
         lang: currentLang.value,
         nickname: storedNickname.value
       });
+
+      if (response.data.offline !== undefined) {
+        isConfigured.value = !response.data.offline;
+      }
 
       const aiReply = response.data.response;
       voiceAiResponse.value = aiReply;
